@@ -37,8 +37,8 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Company Search */}
       <div className="space-y-2">
-        <label className="flex items-center text-sm font-medium text-slate-300">
-          <Building2 size={16} className="mr-2 text-cyan-400" />
+        <label className="flex items-center text-sm font-medium text-slate-700">
+          <Building2 size={16} className="mr-2 text-cyan-600" />
           Search Company
         </label>
         <div className="relative">
@@ -48,13 +48,13 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             onChange={(e) => onCompanyChange(e.target.value)}
             onKeyPress={handleCompanyKeyPress}
             placeholder="e.g., Toyota, Tesla, Apple..."
-            className="w-full bg-slate-800/50 text-white px-4 py-3 pr-12 rounded-xl border border-slate-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder:text-slate-500"
+            className="w-full bg-white text-slate-800 px-4 py-3 pr-12 rounded-xl border border-slate-300 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder:text-slate-400 shadow-sm"
             disabled={isSearchingCompany}
           />
           <button
             onClick={onCompanySearch}
             disabled={isSearchingCompany || !companyQuery.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
             {isSearchingCompany ? (
               <Loader2 size={18} className="animate-spin text-white" />
@@ -68,8 +68,8 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
 
       {/* Parts/Materials Search */}
       <div className="space-y-2">
-        <label className="flex items-center text-sm font-medium text-slate-300">
-          <Package size={16} className="mr-2 text-emerald-400" />
+        <label className="flex items-center text-sm font-medium text-slate-700">
+          <Package size={16} className="mr-2 text-emerald-600" />
           Search Parts / Materials
         </label>
         <div className="relative">
@@ -79,13 +79,13 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             onChange={(e) => onPartsChange(e.target.value)}
             onKeyPress={handlePartsKeyPress}
             placeholder="e.g., Aluminum sheets, Steel coils, Semiconductors..."
-            className="w-full bg-slate-800/50 text-white px-4 py-3 pr-12 rounded-xl border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-500"
+            className="w-full bg-white text-slate-800 px-4 py-3 pr-12 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-400 shadow-sm"
             disabled={isSearchingParts}
           />
           <button
             onClick={onPartsSearch}
             disabled={isSearchingParts || !partsQuery.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
             {isSearchingParts ? (
               <Loader2 size={18} className="animate-spin text-white" />

@@ -47,11 +47,11 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
   };
 
   const getPriceDiffColor = (diff: number) => {
-    if (diff < -5) return 'text-emerald-400'; // Much cheaper
-    if (diff < 0) return 'text-green-400';    // Cheaper
-    if (diff === 0) return 'text-slate-400';  // Same
-    if (diff < 5) return 'text-amber-400';    // Slightly more
-    return 'text-red-400';                     // Much more expensive
+    if (diff < -5) return 'text-emerald-600'; // Much cheaper
+    if (diff < 0) return 'text-green-600';    // Cheaper
+    if (diff === 0) return 'text-slate-500';  // Same
+    if (diff < 5) return 'text-amber-600';    // Slightly more
+    return 'text-red-600';                     // Much more expensive
   };
 
   const getPriceDiffIcon = (diff: number) => {
@@ -65,17 +65,17 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
   }
 
   return (
-    <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-slate-700 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 px-6 py-4 border-b border-slate-700">
-        <h3 className="text-xl font-bold text-white flex items-center">
-          <Edit3 size={20} className="mr-2 text-amber-400" />
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-slate-200">
+        <h3 className="text-xl font-bold text-slate-800 flex items-center">
+          <Edit3 size={20} className="mr-2 text-amber-600" />
           Your Supplier Quote
-          <span className="ml-2 text-xs font-normal text-amber-300 bg-amber-900/30 px-2 py-1 rounded-full">
+          <span className="ml-2 text-xs font-normal text-amber-700 bg-amber-100 px-2 py-1 rounded-full border border-amber-200">
             Enter your prices
           </span>
         </h3>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-sm text-slate-500 mt-1">
           Enter your proposed prices to see how competitive your quote is against market rates.
         </p>
       </div>
@@ -84,14 +84,14 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-700">
-              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-400 uppercase">Part/Material</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold text-slate-400 uppercase">Market Price</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold text-amber-400 uppercase">Your Price</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase">Difference</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase">Qty</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase">Delivery</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-400 uppercase">Quality</th>
+            <tr className="border-b border-slate-200 bg-slate-50">
+              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase">Part/Material</th>
+              <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Market Price</th>
+              <th className="text-right px-4 py-3 text-xs font-semibold text-amber-600 uppercase">Your Price</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Difference</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Qty</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Delivery</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Quality</th>
             </tr>
           </thead>
           <tbody>
@@ -99,29 +99,29 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
               const priceDiff = getPriceDiff(quote.marketPrice, quote.supplierPrice);
               
               return (
-                <tr key={idx} className="border-b border-slate-800 hover:bg-slate-800/50">
+                <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <Package size={16} className="mr-2 text-slate-500" />
-                      <span className="font-medium text-white">{quote.partName}</span>
+                      <Package size={16} className="mr-2 text-slate-400" />
+                      <span className="font-medium text-slate-800">{quote.partName}</span>
                     </div>
                     <span className="text-xs text-slate-500">{quote.unit}</span>
                   </td>
                   
                   <td className="px-4 py-4 text-right">
-                    <span className="text-slate-400">
+                    <span className="text-slate-600">
                       ${quote.marketPrice.toLocaleString()}
                     </span>
                   </td>
                   
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-end">
-                      <DollarSign size={14} className="text-amber-400" />
+                      <DollarSign size={14} className="text-amber-600" />
                       <input
                         type="number"
                         value={quote.supplierPrice}
                         onChange={(e) => updateQuote(idx, 'supplierPrice', parseFloat(e.target.value) || 0)}
-                        className="w-28 bg-slate-700 text-white text-right px-2 py-1.5 rounded border border-amber-500/50 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-none"
+                        className="w-28 bg-white text-slate-800 text-right px-2 py-1.5 rounded border border-amber-300 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none shadow-sm"
                       />
                     </div>
                   </td>
@@ -138,7 +138,7 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
                       type="number"
                       value={quote.quantity}
                       onChange={(e) => updateQuote(idx, 'quantity', parseInt(e.target.value) || 0)}
-                      className="w-20 bg-slate-700 text-white text-center px-2 py-1.5 rounded border border-slate-600 focus:border-cyan-400 outline-none"
+                      className="w-20 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
                     />
                   </td>
                   
@@ -148,7 +148,7 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
                         type="number"
                         value={quote.deliveryDays}
                         onChange={(e) => updateQuote(idx, 'deliveryDays', parseInt(e.target.value) || 0)}
-                        className="w-16 bg-slate-700 text-white text-center px-2 py-1.5 rounded border border-slate-600 focus:border-cyan-400 outline-none"
+                        className="w-16 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
                       />
                       <span className="text-xs text-slate-500">days</span>
                     </div>
@@ -162,7 +162,7 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
                         min={0}
                         max={100}
                         onChange={(e) => updateQuote(idx, 'qualityScore', Math.min(100, parseInt(e.target.value) || 0))}
-                        className="w-16 bg-slate-700 text-white text-center px-2 py-1.5 rounded border border-slate-600 focus:border-cyan-400 outline-none"
+                        className="w-16 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
                       />
                       <span className="text-xs text-slate-500">%</span>
                     </div>
@@ -175,26 +175,26 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
       </div>
 
       {/* Payment Terms */}
-      <div className="px-6 py-4 bg-slate-800/50 border-t border-slate-700">
+      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Clock size={18} className="mr-2 text-slate-400" />
-            <span className="text-sm text-slate-300">Payment Terms</span>
+            <Clock size={18} className="mr-2 text-slate-500" />
+            <span className="text-sm text-slate-700">Payment Terms</span>
           </div>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={paymentTerms}
               onChange={(e) => onPaymentTermsChange(parseInt(e.target.value) || 0)}
-              className="w-20 bg-slate-700 text-white text-center px-2 py-1.5 rounded border border-slate-600 focus:border-cyan-400 outline-none"
+              className="w-20 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
             />
-            <span className="text-sm text-slate-400">days</span>
+            <span className="text-sm text-slate-500">days</span>
           </div>
         </div>
         
         {/* Quick Summary */}
         <div className="mt-4 grid grid-cols-3 gap-4">
-          <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+          <div className="bg-white rounded-lg p-3 text-center border border-slate-200 shadow-sm">
             <p className="text-xs text-slate-500">Avg Price Diff</p>
             <p className={`text-lg font-bold ${getPriceDiffColor(
               quotes.reduce((sum, q) => sum + getPriceDiff(q.marketPrice, q.supplierPrice), 0) / (quotes.length || 1)
@@ -205,15 +205,15 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
               })()}
             </p>
           </div>
-          <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+          <div className="bg-white rounded-lg p-3 text-center border border-slate-200 shadow-sm">
             <p className="text-xs text-slate-500">Avg Quality</p>
-            <p className="text-lg font-bold text-cyan-400">
+            <p className="text-lg font-bold text-cyan-600">
               {(quotes.reduce((sum, q) => sum + q.qualityScore, 0) / (quotes.length || 1)).toFixed(0)}%
             </p>
           </div>
-          <div className="bg-slate-900/50 rounded-lg p-3 text-center">
+          <div className="bg-white rounded-lg p-3 text-center border border-slate-200 shadow-sm">
             <p className="text-xs text-slate-500">Avg Delivery</p>
-            <p className="text-lg font-bold text-violet-400">
+            <p className="text-lg font-bold text-violet-600">
               {(quotes.reduce((sum, q) => sum + q.deliveryDays, 0) / (quotes.length || 1)).toFixed(0)} days
             </p>
           </div>

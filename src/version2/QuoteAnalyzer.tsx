@@ -127,51 +127,51 @@ const QuoteAnalyzer: React.FC = () => {
   const showQuoteInput = parts.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
       {/* Background Pattern */}
-      <div className="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiMxZTI5M2IiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9nPjwvc3ZnPg==')] opacity-20" />
+      <div className="fixed inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiIGZpbGw9IiNjYmQ1ZTEiIGZpbGwtb3BhY2l0eT0iMC4zIi8+PC9nPjwvc3ZnPg==')] opacity-40" />
       
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <header className="text-center mb-10">
-          <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-gradient-to-r from-cyan-900/30 to-violet-900/30 border border-cyan-700/30 mb-4">
-            <Sparkles size={16} className="text-cyan-400 mr-2" />
-            <span className="text-sm text-cyan-300">Powered by Gemini AI + Real-Time Market Data</span>
+          <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-gradient-to-r from-cyan-100 to-violet-100 border border-cyan-200 mb-4 shadow-sm">
+            <Sparkles size={16} className="text-cyan-600 mr-2" />
+            <span className="text-sm text-cyan-700 font-medium">Powered by Gemini AI + Real-Time Market Data</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-cyan-200 to-violet-200 bg-clip-text text-transparent mb-3">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 via-cyan-700 to-violet-700 bg-clip-text text-transparent mb-3">
             Quote Analyzer v2
           </h1>
-          <p className="text-slate-400 max-w-2xl mx-auto">
+          <p className="text-slate-600 max-w-2xl mx-auto">
             Search for buyers and materials, enter your quote prices, and get AI-powered analysis of how competitive your quote is.
           </p>
         </header>
 
         {/* API Key Warning */}
         {!hasApiKey && (
-          <div className="bg-amber-900/20 border border-amber-600/50 rounded-2xl p-6 mb-8">
+          <div className="bg-amber-50 border border-amber-300 rounded-2xl p-6 mb-8 shadow-sm">
             <div className="flex items-start">
-              <AlertTriangle size={24} className="text-amber-400 mr-4 flex-shrink-0 mt-1" />
+              <AlertTriangle size={24} className="text-amber-600 mr-4 flex-shrink-0 mt-1" />
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-amber-300 mb-2 flex items-center">
+                <h3 className="text-lg font-semibold text-amber-800 mb-2 flex items-center">
                   <Key size={18} className="mr-2" />
                   API Key Required
                 </h3>
-                <p className="text-amber-200/80 text-sm mb-4">
+                <p className="text-amber-700 text-sm mb-4">
                   To use this real-time quote analyzer, you need to add your Gemini API key.
                 </p>
-                <div className="bg-slate-900/50 rounded-lg p-4 mb-4">
-                  <p className="text-slate-300 text-sm mb-2">1. Get a free API key from Google AI Studio:</p>
+                <div className="bg-white rounded-lg p-4 mb-4 border border-amber-200">
+                  <p className="text-slate-700 text-sm mb-2">1. Get a free API key from Google AI Studio:</p>
                   <a 
                     href="https://aistudio.google.com/app/apikey" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center text-cyan-400 hover:text-cyan-300 text-sm"
+                    className="inline-flex items-center text-cyan-600 hover:text-cyan-700 text-sm font-medium"
                   >
                     https://aistudio.google.com/app/apikey
                     <ExternalLink size={14} className="ml-1" />
                   </a>
-                  <p className="text-slate-300 text-sm mt-4 mb-2">2. Add to geminiService.ts or create a .env file</p>
-                  <p className="text-slate-300 text-sm mt-2">3. Restart your development server</p>
+                  <p className="text-slate-700 text-sm mt-4 mb-2">2. Add to geminiService.ts or create a .env file</p>
+                  <p className="text-slate-700 text-sm mt-2">3. Restart your development server</p>
                 </div>
               </div>
             </div>
@@ -179,7 +179,7 @@ const QuoteAnalyzer: React.FC = () => {
         )}
 
         {/* Search Panel */}
-        <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-6 mb-8">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 p-6 mb-8 shadow-lg">
           <SearchPanel
             companyQuery={companyQuery}
             partsQuery={partsQuery}
@@ -196,13 +196,13 @@ const QuoteAnalyzer: React.FC = () => {
         {error && (
           <div className={`rounded-xl p-4 mb-6 ${
             error.includes('Rate limit') || error.includes('wait') 
-              ? 'bg-amber-900/20 border border-amber-600/50' 
-              : 'bg-red-900/20 border border-red-700/50'
+              ? 'bg-amber-50 border border-amber-300' 
+              : 'bg-red-50 border border-red-300'
           }`}>
-            <p className={`text-sm text-center ${
+            <p className={`text-sm text-center font-medium ${
               error.includes('Rate limit') || error.includes('wait') 
-                ? 'text-amber-400' 
-                : 'text-red-400'
+                ? 'text-amber-700' 
+                : 'text-red-700'
             }`}>
               {error.includes('Rate limit') || error.includes('wait') 
                 ? '⏳ ' + error + ' (Free tier: 15 requests/minute)' 
@@ -213,7 +213,7 @@ const QuoteAnalyzer: React.FC = () => {
 
         {/* Loading States */}
         {(isSearchingCompany || isSearchingParts) && (
-          <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 mb-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 mb-8 shadow-lg">
             <LoadingState 
               message={isSearchingCompany ? "Searching company data..." : "Fetching market prices..."} 
             />
@@ -256,7 +256,7 @@ const QuoteAnalyzer: React.FC = () => {
             {/* Prompt to enter quotes */}
             {parts.length > 0 && supplierQuotes.length === 0 && !company && (
               <div className="text-center py-4">
-                <p className="text-slate-400 text-sm">
+                <p className="text-slate-500 text-sm">
                   ↑ Enter your quote prices above, then search for a company to analyze attractiveness
                 </p>
               </div>
@@ -264,8 +264,8 @@ const QuoteAnalyzer: React.FC = () => {
 
             {/* Prompt to search company */}
             {parts.length > 0 && supplierQuotes.length > 0 && !company && (
-              <div className="text-center py-4 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
-                <p className="text-amber-400 text-sm">
+              <div className="text-center py-4 bg-amber-50 rounded-xl border border-dashed border-amber-300">
+                <p className="text-amber-700 text-sm font-medium">
                   ⚡ Now search for a buyer company to see how attractive your quote is to them!
                 </p>
               </div>
@@ -273,7 +273,7 @@ const QuoteAnalyzer: React.FC = () => {
 
             {/* Calculating Score */}
             {isCalculatingScore && (
-              <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-lg">
                 <LoadingState message="Analyzing your quote vs market prices..." />
               </div>
             )}
@@ -288,7 +288,7 @@ const QuoteAnalyzer: React.FC = () => {
                   <button
                     onClick={handleCalculateAttractiveness}
                     disabled={isCalculatingScore}
-                    className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-medium rounded-lg transition-all flex items-center"
+                    className="px-6 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium rounded-lg transition-all flex items-center border border-slate-300"
                   >
                     <Zap size={16} className="mr-2" />
                     Recalculate with Updated Prices
@@ -301,34 +301,34 @@ const QuoteAnalyzer: React.FC = () => {
 
         {/* Empty State */}
         {!hasResults && !isSearchingCompany && !isSearchingParts && !error && (
-          <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200 p-8 shadow-lg">
             <div className="text-center mb-8">
-              <h2 className="text-xl font-semibold text-white mb-2">How It Works</h2>
-              <p className="text-slate-400 text-sm">Three simple steps to analyze your quote competitiveness</p>
+              <h2 className="text-xl font-semibold text-slate-800 mb-2">How It Works</h2>
+              <p className="text-slate-500 text-sm">Three simple steps to analyze your quote competitiveness</p>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center p-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-900/30 flex items-center justify-center mx-auto mb-3">
-                  <Package size={24} className="text-emerald-400" />
+                <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3 shadow-sm">
+                  <Package size={24} className="text-emerald-600" />
                 </div>
-                <p className="text-xs text-emerald-400 font-semibold mb-1">STEP 1</p>
-                <h3 className="text-white font-medium mb-1">Search Materials</h3>
+                <p className="text-xs text-emerald-600 font-semibold mb-1">STEP 1</p>
+                <h3 className="text-slate-800 font-medium mb-1">Search Materials</h3>
                 <p className="text-xs text-slate-500">Get real-time market prices</p>
               </div>
               <div className="text-center p-4">
-                <div className="w-12 h-12 rounded-full bg-amber-900/30 flex items-center justify-center mx-auto mb-3">
-                  <span className="text-amber-400 text-xl font-bold">$</span>
+                <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3 shadow-sm">
+                  <span className="text-amber-600 text-xl font-bold">$</span>
                 </div>
-                <p className="text-xs text-amber-400 font-semibold mb-1">STEP 2</p>
-                <h3 className="text-white font-medium mb-1">Enter Your Prices</h3>
+                <p className="text-xs text-amber-600 font-semibold mb-1">STEP 2</p>
+                <h3 className="text-slate-800 font-medium mb-1">Enter Your Prices</h3>
                 <p className="text-xs text-slate-500">Input your quote prices</p>
               </div>
               <div className="text-center p-4">
-                <div className="w-12 h-12 rounded-full bg-cyan-900/30 flex items-center justify-center mx-auto mb-3">
-                  <Building2 size={24} className="text-cyan-400" />
+                <div className="w-12 h-12 rounded-full bg-cyan-100 flex items-center justify-center mx-auto mb-3 shadow-sm">
+                  <Building2 size={24} className="text-cyan-600" />
                 </div>
-                <p className="text-xs text-cyan-400 font-semibold mb-1">STEP 3</p>
-                <h3 className="text-white font-medium mb-1">Search Buyer</h3>
+                <p className="text-xs text-cyan-600 font-semibold mb-1">STEP 3</p>
+                <h3 className="text-slate-800 font-medium mb-1">Search Buyer</h3>
                 <p className="text-xs text-slate-500">Get attractiveness score</p>
               </div>
             </div>
@@ -337,7 +337,7 @@ const QuoteAnalyzer: React.FC = () => {
 
         {/* Footer */}
         <footer className="mt-12 text-center">
-          <p className="text-xs text-slate-600">
+          <p className="text-xs text-slate-500">
             Real-time market data via Gemini AI. Your quote prices are compared against market rates for accurate analysis.
           </p>
         </footer>
