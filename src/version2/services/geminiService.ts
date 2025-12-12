@@ -2,7 +2,7 @@
 import type { CompanyData, PartPricing, AttractivenessResult } from '../types';
 
 // Get API key from environment variable or hardcoded (for development)
-const GEMINI_API_KEY = 'AIzaSyBhAWratgfPSuotj3tpuJs8mliesWziXE0'
+const GEMINI_API_KEY = 'AIzaSyBr2YG5JpGuxwd2cCwQk6KrBc2QxTI-l2I'
 
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent${
   GEMINI_API_KEY ? `?key=${GEMINI_API_KEY}` : ""
@@ -113,22 +113,45 @@ const callGemini = async (
  * Extract JSON from a response that might contain markdown
  */
 const extractJSON = <T>(response: string): T | null => {
+  if (!response || response.trim() === '') {
+    console.error("Empty response received");
+    return null;
+  }
+
+  console.log("Attempting to parse response:", response.substring(0, 200) + "...");
+
   try {
+    // First, try to parse the entire response as JSON directly
+    const directParse = JSON.parse(response);
+    console.log("✅ Direct JSON parse successful");
+    return directParse as T;
+  } catch {
+    // If direct parse fails, try to extract JSON from the string
+    console.log("Direct parse failed, trying regex extraction...");
+  }
+
+  try {
+    // Try to find JSON array first (more common for lists)
+    const arrayMatch = response.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      const parsed = JSON.parse(arrayMatch[0]);
+      console.log("✅ Array extraction successful, items:", Array.isArray(parsed) ? parsed.length : 'N/A');
+      return parsed as T;
+    }
+    
     // Try to find JSON object
     const objectMatch = response.match(/\{[\s\S]*\}/);
     if (objectMatch) {
-      return JSON.parse(objectMatch[0]) as T;
+      const parsed = JSON.parse(objectMatch[0]);
+      console.log("✅ Object extraction successful");
+      return parsed as T;
     }
     
-    // Try to find JSON array
-    const arrayMatch = response.match(/\[[\s\S]*\]/);
-    if (arrayMatch) {
-      return JSON.parse(arrayMatch[0]) as T;
-    }
-    
+    console.error("No JSON found in response");
     return null;
-  } catch {
-    console.error("Failed to parse JSON from response");
+  } catch (err) {
+    console.error("Failed to parse JSON from response:", err);
+    console.error("Response was:", response);
     return null;
   }
 };
@@ -155,7 +178,18 @@ Use real current data from your search.`;
 
   try {
     const response = await callGemini(userQuery, systemPrompt);
-    return extractJSON<CompanyData>(response);
+    console.log("🏢 Company API Response received, length:", response?.length || 0);
+    
+    const data = extractJSON<CompanyData>(response);
+    console.log("🏢 Parsed company data:", data);
+    
+    if (data && data.name) {
+      console.log("✅ Successfully parsed company:", data.name);
+      return data;
+    }
+    
+    console.warn("⚠️ No company data extracted");
+    return null;
   } catch (error) {
     console.error("Error searching company:", error);
     return null;
@@ -185,8 +219,18 @@ Use real current market prices from your search. Include 3-6 relevant items.`;
 
   try {
     const response = await callGemini(userQuery, systemPrompt);
+    console.log("📦 Parts API Response received, length:", response?.length || 0);
+    
     const data = extractJSON<PartPricing[]>(response);
-    return Array.isArray(data) ? data : [];
+    console.log("📦 Parsed parts data:", data);
+    
+    if (Array.isArray(data) && data.length > 0) {
+      console.log("✅ Successfully parsed", data.length, "parts");
+      return data;
+    }
+    
+    console.warn("⚠️ No parts data extracted");
+    return [];
   } catch (error) {
     console.error("Error searching parts:", error);
     return [];
