@@ -115,8 +115,12 @@ interface CompetitiveTargets {
 type Region = "GLOBAL" | "US" | "EU" | "APAC";
 
 // --- API and Utility Constants ---
-const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+// API key is loaded from .env file (VITE_GEMINI_API_KEY)
+const API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "";
+
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent${
+  API_KEY ? `?key=${API_KEY}` : ""
+}`;
 
 const ATTRIBUTES: AttributeConfig[] = [
   { key: "price", label: "Price Competitiveness", icon: DollarSign, unit: "$" },
@@ -528,6 +532,11 @@ const ProposalDraftGenerator: React.FC<ProposalDraftGeneratorProps> = ({
   const [draft, setDraft] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Reset draft when buyer changes
+  useEffect(() => {
+    setDraft("");
+  }, [buyerName]);
+
   const generateProposal = async () => {
     if (!optimizationResult || isGenerating) return;
 
@@ -551,6 +560,7 @@ const ProposalDraftGenerator: React.FC<ProposalDraftGeneratorProps> = ({
 
     const payload = {
       contents: [{ parts: [{ text: userQuery }] }],
+      tools: [{ "google_search": {} }],
       systemInstruction: { parts: [{ text: systemPrompt }] }
     };
 
@@ -615,6 +625,12 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
   };
 
   useEffect(scrollToBottom, [chatHistory]);
+
+  // Reset chat history when buyer changes
+  useEffect(() => {
+    setChatHistory([]);
+    setInput("");
+  }, [buyerName]);
 
   const handleAIChat = async (query: string) => {
     if (!query.trim() || isThinking) return;
@@ -722,10 +738,11 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
 // --- Material Rejection Chart Component ---
 
 interface MaterialRejectionChartProps {
+  buyerName: string;
   rejectionData: MaterialRejection[];
 }
 
-const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ rejectionData }) => {
+const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ buyerName, rejectionData }) => {
   const getColor = (rate: number) => {
     if (rate >= 10) return "bg-red-600";
     if (rate >= 5) return "bg-yellow-600";
@@ -737,7 +754,7 @@ const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ rejecti
       <h4 className="text-xl font-bold text-indigo-300 mb-4 flex items-center">
         <Factory size={20} className="mr-2" /> Quality Rejection Rates
       </h4>
-      <p className="text-sm text-gray-400 mb-4">Historical rejection percentage per material.</p>
+      <p className="text-sm text-gray-400 mb-4">Historical rejection percentage per material for {buyerName}.</p>
 
       <div className="space-y-4">
         {rejectionData.map((item, index) => (
@@ -765,10 +782,13 @@ const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ rejecti
 // --- Buyer Market Performance Chart Component ---
 
 interface BuyerPerformanceChartProps {
+  buyerName: string;
   performanceData: PerformanceData;
 }
 
-const BuyerPerformanceChart: React.FC<BuyerPerformanceChartProps> = ({ performanceData }) => {
+const BuyerPerformanceChart: React.FC<BuyerPerformanceChartProps> = ({ buyerName: _buyerName, performanceData }) => {
+  // Note: buyerName is available for future use if needed
+  void _buyerName; // Suppress unused variable warning
   const allData = [...performanceData.historical, ...performanceData.forecast];
   const growthValues = allData.map((d) => d.growth);
   const maxGrowth = Math.max(...growthValues) + 5; // Buffer for max Y-axis
@@ -996,8 +1016,8 @@ const AnalyticsDashboard: React.FC = () => {
 
         {/* 2. Market Performance and Rejection (Right Side) */}
         <div className="w-1/2 flex flex-col space-y-6">
-          <BuyerPerformanceChart performanceData={marketPerformanceData} />
-          <MaterialRejectionChart rejectionData={rejectionData} />
+          <BuyerPerformanceChart buyerName={selectedBuyer} performanceData={marketPerformanceData} />
+          <MaterialRejectionChart buyerName={selectedBuyer} rejectionData={rejectionData} />
         </div>
       </div>
     </div>
@@ -1474,7 +1494,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="min-h-screen bg-gray-900 text-white font-['Inter'] p-8">
       <header className="mb-8 border-b pb-4 border-gray-700 flex justify-between items-center">
         <div className="flex items-center">
           {/* Logo/Branding Element */}
