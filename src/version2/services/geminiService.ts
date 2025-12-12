@@ -1,12 +1,10 @@
 // Gemini API Service for Real-Time Data Fetching
 import type { CompanyData, PartPricing, AttractivenessResult } from '../types';
 
-// Get API key from environment variable or hardcoded (for development)
-const GEMINI_API_KEY = 'AIzaSyCRVj7_qQmjvYtK4Gi9uwRux9i0-58-Byw'
+// Get API key from environment variable
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent${
-  GEMINI_API_KEY ? `?key=${GEMINI_API_KEY}` : ""
-}`;
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
 
 // Using gemini-1.5-flash - stable and widely available model
 // const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
