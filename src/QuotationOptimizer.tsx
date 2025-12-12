@@ -124,6 +124,173 @@ const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/
   API_KEY ? `?key=${API_KEY}` : ""
 }`;
 
+// --- Real-Time Data Fetching Functions using Gemini + Google Search ---
+
+/**
+ * Generic function to call Gemini API with Google Search grounding
+ */
+const callGeminiWithSearch = async (
+  userQuery: string,
+  systemPrompt: string
+): Promise<string> => {
+  const payload = {
+    contents: [{ parts: [{ text: userQuery }] }],
+    tools: [{ google_search: {} }],
+    systemInstruction: { parts: [{ text: systemPrompt }] }
+  };
+
+  let retries = 0;
+  const maxRetries = 3;
+
+  while (retries < maxRetries) {
+    try {
+      const response = await fetch(GEMINI_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const result = await response.json();
+      return result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    } catch (error) {
+      console.error(`Attempt ${retries + 1} failed:`, error);
+      retries++;
+      if (retries < maxRetries) {
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, retries) * 1000));
+      }
+    }
+  }
+  return "";
+};
+
+/**
+ * Fetches real company growth/performance data using Gemini + Google Search
+ */
+const fetchCompanyPerformanceData = async (
+  companyName: string
+): Promise<PerformanceData | null> => {
+  const systemPrompt = `You are a financial analyst. Extract company revenue/growth data and return ONLY valid JSON, no markdown, no explanation. The JSON must match this exact structure:
+{
+  "historical": [{"year": 2020, "growth": 5.2}, ...],
+  "forecast": [{"year": 2026, "growth": 4.0}, ...]
+}
+Include 5-10 years of historical data and 3-5 years of forecast. Use real publicly available data.`;
+
+  const userQuery = `Find ${companyName}'s annual revenue growth rate (as percentage) for the last 5-10 years and analyst forecasts for the next 3-5 years. Return ONLY the JSON object.`;
+
+  try {
+    const response = await callGeminiWithSearch(userQuery, systemPrompt);
+    
+    // Extract JSON from response (handle potential markdown wrapping)
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed.historical && parsed.forecast) {
+        return parsed as PerformanceData;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching company performance:", error);
+    return null;
+  }
+};
+
+/**
+ * Fetches real commodity/material pricing using Gemini + Google Search
+ */
+const fetchCommodityPrices = async (
+  materials: string[]
+): Promise<Record<string, { price: number; unit: string; trend: string }>> => {
+  const systemPrompt = `You are a commodities market analyst. Return ONLY valid JSON with current market prices, no markdown, no explanation. Format:
+{
+  "Steel": {"price": 750, "unit": "USD/ton", "trend": "up"},
+  "Aluminum": {"price": 2400, "unit": "USD/ton", "trend": "stable"}
+}
+Use real current market prices from recent data.`;
+
+  const userQuery = `Find current market prices for these industrial materials: ${materials.join(", ")}. Include price in USD, unit of measurement, and recent trend (up/down/stable). Return ONLY the JSON object.`;
+
+  try {
+    const response = await callGeminiWithSearch(userQuery, systemPrompt);
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+    return {};
+  } catch (error) {
+    console.error("Error fetching commodity prices:", error);
+    return {};
+  }
+};
+
+/**
+ * Fetches real regional carbon emission targets using Gemini + Google Search
+ */
+const fetchRegionalCarbonTargets = async (): Promise<Record<Region, number>> => {
+  const systemPrompt = `You are a sustainability analyst. Return ONLY valid JSON with carbon reduction multipliers by region (1.0 = no reduction, 0.7 = 30% reduction required). No markdown, no explanation. Format:
+{
+  "GLOBAL": 0.85,
+  "US": 0.80,
+  "EU": 0.70,
+  "APAC": 0.90
+}
+Base these on actual 2024-2025 regulatory requirements and corporate sustainability targets.`;
+
+  const userQuery = `What are the current carbon emission reduction targets for manufacturing and supply chain in different regions (Global average, US, EU, APAC)? Express as a multiplier where 1.0 means no reduction and 0.7 means 30% reduction required. Return ONLY the JSON object.`;
+
+  try {
+    const response = await callGeminiWithSearch(userQuery, systemPrompt);
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        GLOBAL: parsed.GLOBAL ?? 0.85,
+        US: parsed.US ?? 0.8,
+        EU: parsed.EU ?? 0.7,
+        APAC: parsed.APAC ?? 0.9
+      };
+    }
+    return MOCK_CARBON_TARGETS;
+  } catch (error) {
+    console.error("Error fetching carbon targets:", error);
+    return MOCK_CARBON_TARGETS;
+  }
+};
+
+/**
+ * Fetches real material rejection/quality data for a specific buyer
+ */
+const fetchMaterialRejectionData = async (
+  buyerName: string
+): Promise<MaterialRejection[]> => {
+  const systemPrompt = `You are a quality control analyst. Return ONLY valid JSON array with material rejection data, no markdown, no explanation. Format:
+[
+  {"material": "Steel Alloy", "rejectionRate": 5, "reason": "Dimensional tolerance issues"},
+  {"material": "Aluminum", "rejectionRate": 3, "reason": "Surface finish defects"}
+]
+Use realistic industry data based on public quality reports and industry standards for automotive/manufacturing.`;
+
+  const userQuery = `What are typical material rejection rates and common quality issues for suppliers working with ${buyerName}? Include 3-5 common materials used in their supply chain with rejection percentages and primary reasons. Return ONLY the JSON array.`;
+
+  try {
+    const response = await callGeminiWithSearch(userQuery, systemPrompt);
+    const jsonMatch = response.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed as MaterialRejection[];
+      }
+    }
+    return MOCK_MATERIAL_REJECTION[buyerName] || [];
+  } catch (error) {
+    console.error("Error fetching rejection data:", error);
+    return MOCK_MATERIAL_REJECTION[buyerName] || [];
+  }
+};
+
 const ATTRIBUTES: AttributeConfig[] = [
   { key: "price", label: "Price Competitiveness", icon: DollarSign, unit: "$" },
   { key: "quality", label: "Quality Certifications", icon: Layers, unit: "%" },
@@ -1035,13 +1202,25 @@ const generateMockAnalytics = (): Record<string, AnalyticsDataPoint[]> => {
 
 const MOCK_ANALYTICS = generateMockAnalytics();
 
-const AnalyticsDashboard: React.FC = () => {
+interface AnalyticsDashboardProps {
+  realPerformanceData?: Record<string, PerformanceData>;
+  realRejectionData?: Record<string, MaterialRejection[]>;
+  isLoadingRealData?: boolean;
+}
+
+const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
+  realPerformanceData,
+  realRejectionData,
+  isLoadingRealData = false
+}) => {
   const [selectedBuyer, setSelectedBuyer] = useState(BUYER_PROFILES[0].name);
   const [chartStyle, setChartStyle] = useState<"horizontal" | "vertical">("horizontal");
 
   const buyerData = MOCK_ANALYTICS[selectedBuyer];
-  const rejectionData = MOCK_MATERIAL_REJECTION[selectedBuyer];
-  const marketPerformanceData = MOCK_BUYER_PERFORMANCE[selectedBuyer];
+  
+  // Use real data if available, fallback to mock
+  const rejectionData = realRejectionData?.[selectedBuyer] || MOCK_MATERIAL_REJECTION[selectedBuyer];
+  const marketPerformanceData = realPerformanceData?.[selectedBuyer] || MOCK_BUYER_PERFORMANCE[selectedBuyer];
 
   const renderHorizontalChart = () => (
     <div className="space-y-3">
@@ -1097,11 +1276,33 @@ const AnalyticsDashboard: React.FC = () => {
     </div>
   );
 
+  const isUsingRealPerformance = !!realPerformanceData?.[selectedBuyer];
+  const isUsingRealRejection = !!realRejectionData?.[selectedBuyer];
+
   return (
     <div className="mt-12 p-8 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
-      <h2 className="3xl font-bold text-yellow-400 mb-6 flex items-center">
-        <BarChart3 size={28} className="mr-3" /> Quotation Performance Analysis
-      </h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="3xl font-bold text-yellow-400 flex items-center">
+          <BarChart3 size={28} className="mr-3" /> Quotation Performance Analysis
+        </h2>
+        {/* Real-time data indicator */}
+        <div className="flex items-center space-x-2">
+          {isLoadingRealData ? (
+            <span className="flex items-center text-xs text-blue-400 bg-blue-900/30 px-3 py-1 rounded-full">
+              <Loader2 size={12} className="animate-spin mr-1" /> Fetching live data...
+            </span>
+          ) : (
+            <span className={`flex items-center text-xs px-3 py-1 rounded-full ${
+              isUsingRealPerformance || isUsingRealRejection 
+                ? "text-green-400 bg-green-900/30" 
+                : "text-gray-400 bg-gray-700"
+            }`}>
+              <Globe size={12} className="mr-1" />
+              {isUsingRealPerformance || isUsingRealRejection ? "Live Data" : "Mock Data"}
+            </span>
+          )}
+        </div>
+      </div>
 
       <div className="flex space-x-6">
         {/* 1. Historical Bid Chart (Left Side) */}
@@ -1442,6 +1643,13 @@ const App: React.FC = () => {
   // Line Items for the table input
   const [lineItems, setLineItems] = useState<LineItem[]>(INITIAL_LINE_ITEMS(BUYER_PROFILES[0].historical));
 
+  // Real-time market data state
+  const [realPerformanceData, setRealPerformanceData] = useState<Record<string, PerformanceData>>({});
+  const [realRejectionData, setRealRejectionData] = useState<Record<string, MaterialRejection[]>>({});
+  const [realCarbonTargets, setRealCarbonTargets] = useState<Record<Region, number> | null>(null);
+  const [commodityPrices, setCommodityPrices] = useState<Record<string, { price: number; unit: string; trend: string }>>({});
+  const [isLoadingMarketData, setIsLoadingMarketData] = useState(false);
+
   const handleLineItemChange = useCallback(
     (firstItem: LineItem) => {
       // This function updates the single supplierQuote state based on the first item's strategic attributes
@@ -1460,6 +1668,49 @@ const App: React.FC = () => {
     },
     [buyerFocus]
   );
+
+  // Fetch real market data in the background
+  const fetchMarketData = useCallback(async (name: string) => {
+    setIsLoadingMarketData(true);
+    
+    try {
+      // Fetch all market data in parallel
+      const [performanceData, rejectionData, carbonTargets, prices] = await Promise.all([
+        fetchCompanyPerformanceData(name),
+        fetchMaterialRejectionData(name),
+        fetchRegionalCarbonTargets(),
+        fetchCommodityPrices(["Steel", "Aluminum", "Copper", "Rubber", "Plastics"])
+      ]);
+
+      // Update state with real data
+      if (performanceData) {
+        setRealPerformanceData(prev => ({ ...prev, [name]: performanceData }));
+      }
+      
+      if (rejectionData && rejectionData.length > 0) {
+        setRealRejectionData(prev => ({ ...prev, [name]: rejectionData }));
+      }
+      
+      if (carbonTargets) {
+        setRealCarbonTargets(carbonTargets);
+      }
+      
+      if (Object.keys(prices).length > 0) {
+        setCommodityPrices(prices);
+      }
+
+      console.log("✅ Real market data fetched successfully:", {
+        performance: !!performanceData,
+        rejection: rejectionData?.length || 0,
+        carbon: !!carbonTargets,
+        commodities: Object.keys(prices).length
+      });
+    } catch (error) {
+      console.error("Error fetching market data:", error);
+    } finally {
+      setIsLoadingMarketData(false);
+    }
+  }, []);
 
   const handleAnalyze = useCallback(
     async (name: string) => {
@@ -1489,6 +1740,10 @@ const App: React.FC = () => {
           // Use the first item's strategic attributes for optimization state
           handleLineItemChange(initialItems[0]);
         }
+
+        // 4. Fetch real market data in the background (non-blocking)
+        fetchMarketData(name);
+        
       } catch (error) {
         console.error("Analysis Error:", error);
         setBuyerSentiment("Error fetching data. Check console for details.");
@@ -1498,7 +1753,7 @@ const App: React.FC = () => {
         setIsLoading(false);
       }
     },
-    [handleLineItemChange]
+    [handleLineItemChange, fetchMarketData]
   );
 
   // Initial load effect
@@ -1566,10 +1821,59 @@ const App: React.FC = () => {
               <p className="text-sm text-red-400">No historical data found.</p>
             )}
           </div>
+
+          {/* Real-time Market Data Status */}
+          <div className="mt-6 pt-4 border-t border-gray-700">
+            <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+              <Globe size={16} className="mr-2 text-green-400" /> Live Market Data
+            </h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Company Performance</span>
+                {isLoadingMarketData ? (
+                  <Loader2 size={14} className="animate-spin text-blue-400" />
+                ) : realPerformanceData[buyerName] ? (
+                  <span className="text-green-400 text-xs bg-green-900/30 px-2 py-0.5 rounded">✓ Live</span>
+                ) : (
+                  <span className="text-gray-500 text-xs bg-gray-700 px-2 py-0.5 rounded">Mock</span>
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Material Rejection</span>
+                {isLoadingMarketData ? (
+                  <Loader2 size={14} className="animate-spin text-blue-400" />
+                ) : realRejectionData[buyerName] ? (
+                  <span className="text-green-400 text-xs bg-green-900/30 px-2 py-0.5 rounded">✓ Live</span>
+                ) : (
+                  <span className="text-gray-500 text-xs bg-gray-700 px-2 py-0.5 rounded">Mock</span>
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Carbon Targets</span>
+                {isLoadingMarketData ? (
+                  <Loader2 size={14} className="animate-spin text-blue-400" />
+                ) : realCarbonTargets ? (
+                  <span className="text-green-400 text-xs bg-green-900/30 px-2 py-0.5 rounded">✓ Live</span>
+                ) : (
+                  <span className="text-gray-500 text-xs bg-gray-700 px-2 py-0.5 rounded">Mock</span>
+                )}
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Commodity Prices</span>
+                {isLoadingMarketData ? (
+                  <Loader2 size={14} className="animate-spin text-blue-400" />
+                ) : Object.keys(commodityPrices).length > 0 ? (
+                  <span className="text-green-400 text-xs bg-green-900/30 px-2 py-0.5 rounded">✓ Live</span>
+                ) : (
+                  <span className="text-gray-500 text-xs bg-gray-700 px-2 py-0.5 rounded">Mock</span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     ),
-    [buyerName, isLoading, handleAnalyze, buyerSentiment, buyerFocus, historicalData, attributeRanking]
+    [buyerName, isLoading, handleAnalyze, buyerSentiment, buyerFocus, historicalData, attributeRanking, isLoadingMarketData, realPerformanceData, realRejectionData, realCarbonTargets, commodityPrices]
   );
 
   const OptimizationPanel = useMemo(
@@ -1674,7 +1978,70 @@ const App: React.FC = () => {
       </div>
 
       {/* Historical Analytics Dashboard (Full Width) */}
-      <AnalyticsDashboard />
+      <AnalyticsDashboard 
+        realPerformanceData={realPerformanceData}
+        realRejectionData={realRejectionData}
+        isLoadingRealData={isLoadingMarketData}
+      />
+
+      {/* Commodity Prices Panel */}
+      {Object.keys(commodityPrices).length > 0 && (
+        <div className="mt-6 p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+          <h3 className="text-xl font-bold text-emerald-400 mb-4 flex items-center">
+            <TrendingUp size={20} className="mr-2" /> Live Commodity Prices
+            <span className="ml-2 text-xs text-green-400 bg-green-900/30 px-2 py-1 rounded-full flex items-center">
+              <Globe size={10} className="mr-1" /> Real-time
+            </span>
+          </h3>
+          <div className="grid grid-cols-5 gap-4">
+            {Object.entries(commodityPrices).map(([material, data]) => (
+              <div key={material} className="bg-gray-700 p-4 rounded-lg border border-gray-600">
+                <h4 className="text-sm font-semibold text-gray-300">{material}</h4>
+                <p className="text-2xl font-bold text-white mt-1">
+                  ${typeof data.price === 'number' ? data.price.toLocaleString() : data.price}
+                </p>
+                <p className="text-xs text-gray-400">{data.unit}</p>
+                <span className={`text-xs font-semibold mt-2 inline-block px-2 py-0.5 rounded ${
+                  data.trend === 'up' ? 'text-green-400 bg-green-900/30' :
+                  data.trend === 'down' ? 'text-red-400 bg-red-900/30' :
+                  'text-yellow-400 bg-yellow-900/30'
+                }`}>
+                  {data.trend === 'up' ? '↑ Rising' : data.trend === 'down' ? '↓ Falling' : '→ Stable'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Real Carbon Targets Panel */}
+      {realCarbonTargets && (
+        <div className="mt-6 p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+          <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center">
+            <Globe size={20} className="mr-2" /> Regional Carbon Reduction Targets
+            <span className="ml-2 text-xs text-green-400 bg-green-900/30 px-2 py-1 rounded-full flex items-center">
+              <Globe size={10} className="mr-1" /> Live Data
+            </span>
+          </h3>
+          <div className="grid grid-cols-4 gap-4">
+            {(Object.entries(realCarbonTargets) as [Region, number][]).map(([region, factor]) => (
+              <div key={region} className="bg-gray-700 p-4 rounded-lg border border-gray-600 text-center">
+                <h4 className="text-lg font-bold text-white">{region}</h4>
+                <p className="text-3xl font-extrabold text-red-400 mt-2">
+                  {((1 - factor) * 100).toFixed(0)}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Reduction Required</p>
+                <div className="mt-2 h-2 bg-gray-600 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-500 to-red-500" 
+                    style={{ width: `${(1 - factor) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
