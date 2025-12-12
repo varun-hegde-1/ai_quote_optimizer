@@ -1494,7 +1494,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-['Inter'] p-8">
+    <div className="min-h-screen bg-gray-900 text-white p-8">
       <header className="mb-8 border-b pb-4 border-gray-700 flex justify-between items-center">
         <div className="flex items-center">
           {/* Logo/Branding Element */}
