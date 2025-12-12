@@ -21,7 +21,9 @@ import {
   Factory,
   LineChart,
   PlusCircle,
-  Trash2
+  Trash2,
+  Mic,
+  MicOff
 } from "lucide-react";
 
 // --- Type Definitions ---
@@ -614,11 +616,63 @@ interface AIPricingAssistantProps {
   buyerName: string;
 }
 
+// Speech Recognition types for TypeScript
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  isFinal: boolean;
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  onend: (() => void) | null;
+  onstart: (() => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) => {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -626,11 +680,75 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
 
   useEffect(scrollToBottom, [chatHistory]);
 
+  // Initialize speech recognition
+  useEffect(() => {
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognitionAPI) {
+      setSpeechSupported(true);
+      const recognition = new SpeechRecognitionAPI();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = "en-US";
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const results = event.results;
+        let transcript = "";
+
+        for (let i = event.resultIndex; i < results.length; i++) {
+          transcript += results[i][0].transcript;
+        }
+
+        setInput(transcript);
+
+        // If this is a final result, we can optionally auto-submit
+        if (results[results.length - 1].isFinal) {
+          setIsListening(false);
+        }
+      };
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error("Speech recognition error:", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
   // Reset chat history when buyer changes
   useEffect(() => {
     setChatHistory([]);
     setInput("");
+    // Stop listening if buyer changes
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
   }, [buyerName]);
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setInput(""); // Clear input before starting
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   const handleAIChat = async (query: string) => {
     if (!query.trim() || isThinking) return;
@@ -713,20 +831,46 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
 
       {/* Input Area */}
       <div className="flex space-x-3 pt-4 border-t border-gray-700">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === "Enter") handleAIChat(input);
-          }}
-          placeholder={`Ask about ${buyerName}'s pricing...`}
-          className="flex-1 bg-gray-700 text-white p-3 rounded-lg border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500"
-          disabled={isThinking}
-        />
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") handleAIChat(input);
+            }}
+            placeholder={isListening ? "Listening... speak now" : `Ask about ${buyerName}'s pricing...`}
+            className={`w-full bg-gray-700 text-white p-3 rounded-lg border ${
+              isListening ? "border-red-500 ring-2 ring-red-500/50" : "border-gray-600"
+            } focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200`}
+            disabled={isThinking || isListening}
+          />
+          {isListening && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+              <span className="text-xs text-red-400 font-medium">Recording</span>
+            </span>
+          )}
+        </div>
+
+        {/* Speech-to-Text Button */}
+        {speechSupported && (
+          <button
+            onClick={toggleListening}
+            disabled={isThinking}
+            title={isListening ? "Stop listening" : "Start voice input"}
+            className={`p-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+              isListening
+                ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+                : "bg-gray-600 hover:bg-gray-500 text-gray-300 hover:text-white"
+            }`}>
+            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+          </button>
+        )}
+
         <button
           onClick={() => handleAIChat(input)}
-          disabled={isThinking || input.trim() === ""}
+          disabled={isThinking || input.trim() === "" || isListening}
           className="p-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
           {isThinking ? <Loader2 size={24} className="animate-spin" /> : <Send size={20} />}
         </button>
