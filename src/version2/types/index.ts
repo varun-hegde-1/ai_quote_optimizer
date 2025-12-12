@@ -23,6 +23,24 @@ export interface PartPricing {
   leadTime?: string;
 }
 
+// Supplier's quote for a specific part
+export interface SupplierQuoteItem {
+  partName: string;
+  marketPrice: number;
+  supplierPrice: number;
+  unit: string;
+  quantity: number;
+  deliveryDays: number;
+  qualityScore: number; // 0-100
+}
+
+export interface SupplierQuote {
+  items: SupplierQuoteItem[];
+  paymentTerms: number; // days
+  validityDays: number;
+  notes?: string;
+}
+
 export interface AttractivenessResult {
   overallScore: number;
   priceCompetitiveness: number;

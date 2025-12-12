@@ -7,7 +7,7 @@ import {
   PartsTable, 
   AttractivenessScore,
   LoadingState,
-  EmptyState 
+  SupplierQuoteInput
 } from './components';
 
 import { 
@@ -17,7 +17,7 @@ import {
   isApiKeyConfigured 
 } from './services/geminiService';
 
-import type { CompanyData, PartPricing, AttractivenessResult } from './types';
+import type { CompanyData, PartPricing, AttractivenessResult, SupplierQuoteItem } from './types';
 
 const QuoteAnalyzer: React.FC = () => {
   // API key check
@@ -40,6 +40,10 @@ const QuoteAnalyzer: React.FC = () => {
   const [attractiveness, setAttractiveness] = useState<AttractivenessResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Supplier quote state
+  const [supplierQuotes, setSupplierQuotes] = useState<SupplierQuoteItem[]>([]);
+  const [paymentTerms, setPaymentTerms] = useState(30);
+
   // Handle company search
   const handleCompanySearch = useCallback(async () => {
     if (!companyQuery.trim()) return;
@@ -52,13 +56,6 @@ const QuoteAnalyzer: React.FC = () => {
       const result = await searchCompany(companyQuery);
       if (result) {
         setCompany(result);
-        // If we have parts, calculate attractiveness
-        if (parts.length > 0) {
-          setIsCalculatingScore(true);
-          const score = await calculateAttractiveness(result, parts);
-          setAttractiveness(score);
-          setIsCalculatingScore(false);
-        }
       } else {
         setError(`Could not find information for "${companyQuery}". Try a different company name.`);
       }
@@ -68,7 +65,7 @@ const QuoteAnalyzer: React.FC = () => {
     } finally {
       setIsSearchingCompany(false);
     }
-  }, [companyQuery, parts]);
+  }, [companyQuery]);
 
   // Handle parts search
   const handlePartsSearch = useCallback(async () => {
@@ -77,18 +74,12 @@ const QuoteAnalyzer: React.FC = () => {
     setIsSearchingParts(true);
     setError(null);
     setAttractiveness(null);
+    setSupplierQuotes([]); // Reset quotes when new parts are searched
 
     try {
       const result = await searchPartsPricing(partsQuery);
       if (result.length > 0) {
         setParts(result);
-        // If we have a company, calculate attractiveness
-        if (company) {
-          setIsCalculatingScore(true);
-          const score = await calculateAttractiveness(company, result);
-          setAttractiveness(score);
-          setIsCalculatingScore(false);
-        }
       } else {
         setError(`Could not find pricing for "${partsQuery}". Try different keywords.`);
       }
@@ -98,9 +89,16 @@ const QuoteAnalyzer: React.FC = () => {
     } finally {
       setIsSearchingParts(false);
     }
-  }, [partsQuery, company]);
+  }, [partsQuery]);
 
-  // Calculate attractiveness manually
+  // Handle supplier quote changes
+  const handleQuoteChange = useCallback((quotes: SupplierQuoteItem[]) => {
+    setSupplierQuotes(quotes);
+    // Reset attractiveness when quotes change
+    setAttractiveness(null);
+  }, []);
+
+  // Calculate attractiveness with supplier quotes
   const handleCalculateAttractiveness = useCallback(async () => {
     if (!company || parts.length === 0) return;
     
@@ -108,7 +106,13 @@ const QuoteAnalyzer: React.FC = () => {
     setError(null);
 
     try {
-      const result = await calculateAttractiveness(company, parts);
+      // Pass supplier quotes if available
+      const result = await calculateAttractiveness(
+        company, 
+        parts, 
+        supplierQuotes.length > 0 ? supplierQuotes : undefined,
+        paymentTerms
+      );
       setAttractiveness(result);
     } catch (err) {
       setError('Failed to calculate attractiveness. Please try again.');
@@ -116,10 +120,11 @@ const QuoteAnalyzer: React.FC = () => {
     } finally {
       setIsCalculatingScore(false);
     }
-  }, [company, parts]);
+  }, [company, parts, supplierQuotes, paymentTerms]);
 
   const hasResults = company || parts.length > 0;
-  const canCalculate = company && parts.length > 0 && !attractiveness;
+  const canCalculate = company && parts.length > 0 && supplierQuotes.length > 0;
+  const showQuoteInput = parts.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -131,13 +136,13 @@ const QuoteAnalyzer: React.FC = () => {
         <header className="text-center mb-10">
           <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-gradient-to-r from-cyan-900/30 to-violet-900/30 border border-cyan-700/30 mb-4">
             <Sparkles size={16} className="text-cyan-400 mr-2" />
-            <span className="text-sm text-cyan-300">Powered by Gemini AI + Real-Time Search</span>
+            <span className="text-sm text-cyan-300">Powered by Gemini AI + Real-Time Market Data</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-cyan-200 to-violet-200 bg-clip-text text-transparent mb-3">
-            Quote Analyzer
+            Quote Analyzer v2
           </h1>
           <p className="text-slate-400 max-w-2xl mx-auto">
-            Search for any company and materials to get real-time pricing, market insights, and AI-powered quote attractiveness analysis.
+            Search for buyers and materials, enter your quote prices, and get AI-powered analysis of how competitive your quote is.
           </p>
         </header>
 
@@ -165,11 +170,8 @@ const QuoteAnalyzer: React.FC = () => {
                     https://aistudio.google.com/app/apikey
                     <ExternalLink size={14} className="ml-1" />
                   </a>
-                  <p className="text-slate-300 text-sm mt-4 mb-2">2. Create a <code className="bg-slate-800 px-2 py-0.5 rounded text-cyan-300">.env</code> file in your project root:</p>
-                  <pre className="bg-slate-800 rounded p-3 text-sm text-emerald-300 overflow-x-auto">
-                    VITE_GEMINI_API_KEY=your_api_key_here
-                  </pre>
-                  <p className="text-slate-300 text-sm mt-4">3. Restart your development server</p>
+                  <p className="text-slate-300 text-sm mt-4 mb-2">2. Add to geminiService.ts or create a .env file</p>
+                  <p className="text-slate-300 text-sm mt-2">3. Restart your development server</p>
                 </div>
               </div>
             </div>
@@ -224,11 +226,21 @@ const QuoteAnalyzer: React.FC = () => {
             {/* Company Card */}
             {company && <CompanyCard company={company} />}
 
-            {/* Parts Table */}
+            {/* Parts Table - Market Prices */}
             {parts.length > 0 && <PartsTable parts={parts} />}
 
-            {/* Calculate Button (if both present but no score yet) */}
-            {canCalculate && (
+            {/* Supplier Quote Input */}
+            {showQuoteInput && (
+              <SupplierQuoteInput
+                marketParts={parts}
+                onQuoteChange={handleQuoteChange}
+                paymentTerms={paymentTerms}
+                onPaymentTermsChange={setPaymentTerms}
+              />
+            )}
+
+            {/* Calculate Button */}
+            {canCalculate && !attractiveness && (
               <div className="flex justify-center">
                 <button
                   onClick={handleCalculateAttractiveness}
@@ -236,21 +248,53 @@ const QuoteAnalyzer: React.FC = () => {
                   className="px-8 py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-violet-900/30 transition-all flex items-center disabled:opacity-50"
                 >
                   <Zap size={20} className="mr-2" />
-                  Calculate Attractiveness Score
+                  Analyze Quote Attractiveness
                 </button>
+              </div>
+            )}
+
+            {/* Prompt to enter quotes */}
+            {parts.length > 0 && supplierQuotes.length === 0 && !company && (
+              <div className="text-center py-4">
+                <p className="text-slate-400 text-sm">
+                  ↑ Enter your quote prices above, then search for a company to analyze attractiveness
+                </p>
+              </div>
+            )}
+
+            {/* Prompt to search company */}
+            {parts.length > 0 && supplierQuotes.length > 0 && !company && (
+              <div className="text-center py-4 bg-slate-800/30 rounded-xl border border-dashed border-slate-700">
+                <p className="text-amber-400 text-sm">
+                  ⚡ Now search for a buyer company to see how attractive your quote is to them!
+                </p>
               </div>
             )}
 
             {/* Calculating Score */}
             {isCalculatingScore && (
               <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800">
-                <LoadingState message="Analyzing quote attractiveness..." />
+                <LoadingState message="Analyzing your quote vs market prices..." />
               </div>
             )}
 
             {/* Attractiveness Score */}
             {attractiveness && !isCalculatingScore && (
-              <AttractivenessScore result={attractiveness} />
+              <>
+                <AttractivenessScore result={attractiveness} />
+                
+                {/* Recalculate button */}
+                <div className="flex justify-center">
+                  <button
+                    onClick={handleCalculateAttractiveness}
+                    disabled={isCalculatingScore}
+                    className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 text-sm font-medium rounded-lg transition-all flex items-center"
+                  >
+                    <Zap size={16} className="mr-2" />
+                    Recalculate with Updated Prices
+                  </button>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -258,17 +302,35 @@ const QuoteAnalyzer: React.FC = () => {
         {/* Empty State */}
         {!hasResults && !isSearchingCompany && !isSearchingParts && !error && (
           <div className="bg-slate-900/50 backdrop-blur-sm rounded-2xl border border-slate-800 p-8">
-            <div className="grid md:grid-cols-2 gap-8">
-              <EmptyState
-                icon={<Building2 size={28} className="text-cyan-400" />}
-                title="Search a Company"
-                description="Enter a company name to fetch their procurement profile, supply chain focus, and quality requirements."
-              />
-              <EmptyState
-                icon={<Package size={28} className="text-emerald-400" />}
-                title="Search Parts & Materials"
-                description="Enter materials or components to get real-time market pricing, trends, and supplier information."
-              />
+            <div className="text-center mb-8">
+              <h2 className="text-xl font-semibold text-white mb-2">How It Works</h2>
+              <p className="text-slate-400 text-sm">Three simple steps to analyze your quote competitiveness</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center p-4">
+                <div className="w-12 h-12 rounded-full bg-emerald-900/30 flex items-center justify-center mx-auto mb-3">
+                  <Package size={24} className="text-emerald-400" />
+                </div>
+                <p className="text-xs text-emerald-400 font-semibold mb-1">STEP 1</p>
+                <h3 className="text-white font-medium mb-1">Search Materials</h3>
+                <p className="text-xs text-slate-500">Get real-time market prices</p>
+              </div>
+              <div className="text-center p-4">
+                <div className="w-12 h-12 rounded-full bg-amber-900/30 flex items-center justify-center mx-auto mb-3">
+                  <span className="text-amber-400 text-xl font-bold">$</span>
+                </div>
+                <p className="text-xs text-amber-400 font-semibold mb-1">STEP 2</p>
+                <h3 className="text-white font-medium mb-1">Enter Your Prices</h3>
+                <p className="text-xs text-slate-500">Input your quote prices</p>
+              </div>
+              <div className="text-center p-4">
+                <div className="w-12 h-12 rounded-full bg-cyan-900/30 flex items-center justify-center mx-auto mb-3">
+                  <Building2 size={24} className="text-cyan-400" />
+                </div>
+                <p className="text-xs text-cyan-400 font-semibold mb-1">STEP 3</p>
+                <h3 className="text-white font-medium mb-1">Search Buyer</h3>
+                <p className="text-xs text-slate-500">Get attractiveness score</p>
+              </div>
             </div>
           </div>
         )}
@@ -276,7 +338,7 @@ const QuoteAnalyzer: React.FC = () => {
         {/* Footer */}
         <footer className="mt-12 text-center">
           <p className="text-xs text-slate-600">
-            Data sourced in real-time via Gemini AI with Google Search grounding. No mock data used.
+            Real-time market data via Gemini AI. Your quote prices are compared against market rates for accurate analysis.
           </p>
         </footer>
       </div>
@@ -285,4 +347,3 @@ const QuoteAnalyzer: React.FC = () => {
 };
 
 export default QuoteAnalyzer;
-

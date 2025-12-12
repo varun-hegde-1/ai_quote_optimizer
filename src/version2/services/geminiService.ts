@@ -2,7 +2,7 @@
 import type { CompanyData, PartPricing, AttractivenessResult } from '../types';
 
 // Get API key from environment variable or hardcoded (for development)
-const GEMINI_API_KEY = 'AIzaSyBr2YG5JpGuxwd2cCwQk6KrBc2QxTI-l2I'
+const GEMINI_API_KEY = 'AIzaSyCRVj7_qQmjvYtK4Gi9uwRux9i0-58-Byw'
 
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent${
   GEMINI_API_KEY ? `?key=${GEMINI_API_KEY}` : ""
@@ -238,42 +238,73 @@ Use real current market prices from your search. Include 3-6 relevant items.`;
 };
 
 /**
- * Calculate attractiveness score based on company and parts data
+ * Calculate attractiveness score based on company, market prices, and supplier quotes
  */
 export const calculateAttractiveness = async (
   company: CompanyData,
-  parts: PartPricing[]
+  parts: PartPricing[],
+  supplierQuotes?: { partName: string; marketPrice: number; supplierPrice: number; unit: string; quantity: number; deliveryDays: number; qualityScore: number }[],
+  paymentTerms?: number
 ): Promise<AttractivenessResult | null> => {
-  const systemPrompt = `You are a strategic procurement advisor. Analyze the supplier attractiveness and return ONLY valid JSON, no markdown. Format:
+  const systemPrompt = `You are a strategic procurement advisor. Analyze the supplier's quote attractiveness compared to market prices and buyer expectations. Return ONLY valid JSON, no markdown. Format:
 {
   "overallScore": 78,
   "priceCompetitiveness": 82,
   "qualityAlignment": 75,
   "deliveryReliability": 80,
   "sustainabilityFit": 70,
-  "recommendation": "One paragraph strategic recommendation",
+  "recommendation": "One paragraph strategic recommendation on how to improve the quote",
   "keyInsights": ["Insight 1", "Insight 2", "Insight 3"]
 }
-All scores should be 0-100. Provide realistic analysis based on the data.`;
+All scores should be 0-100. Higher scores mean more attractive to the buyer.
+- Price: Lower than market = higher score
+- Quality: Higher quality = higher score
+- Delivery: Faster delivery = higher score
+Provide specific, actionable recommendations.`;
 
-  const partsContext = parts.map(p => 
-    `${p.partName}: $${p.currentPrice}/${p.unit} (${p.trend}, ${p.priceChange}% change)`
-  ).join('; ');
-
-  const userQuery = `Analyze supplier attractiveness for a company quoting to "${company.name}" (${company.industry}).
+  // Build context based on whether we have supplier quotes or just market data
+  let quoteContext = '';
   
-Company Focus: ${company.supplyChainFocus}
-Quality Standards Required: ${company.qualityStandards?.join(', ') || 'Standard'}
-Sustainability Score: ${company.sustainabilityScore || 'Unknown'}/100
-Typical Payment Terms: ${company.paymentTermsTypical || 30} days
+  if (supplierQuotes && supplierQuotes.length > 0) {
+    quoteContext = supplierQuotes.map(q => {
+      const priceDiff = ((q.supplierPrice - q.marketPrice) / q.marketPrice * 100).toFixed(1);
+      const comparison = q.supplierPrice < q.marketPrice ? 'BELOW market' : q.supplierPrice > q.marketPrice ? 'ABOVE market' : 'AT market';
+      return `${q.partName}: Market $${q.marketPrice}, Supplier Quote $${q.supplierPrice} (${priceDiff}% ${comparison}), Qty: ${q.quantity}, Delivery: ${q.deliveryDays} days, Quality: ${q.qualityScore}%`;
+    }).join('\n');
+  } else {
+    quoteContext = parts.map(p => 
+      `${p.partName}: Market Price $${p.currentPrice}/${p.unit} (${p.trend}, ${p.priceChange}% change)`
+    ).join('\n');
+  }
 
-Parts/Materials being quoted: ${partsContext}
+  const userQuery = `Analyze supplier quote attractiveness for buyer "${company.name}" (${company.industry}).
 
-Calculate attractiveness scores and provide strategic insights. Return ONLY the JSON object.`;
+## BUYER PROFILE
+- Primary Focus: ${company.supplyChainFocus}
+- Quality Standards Required: ${company.qualityStandards?.join(', ') || 'Standard'}
+- Sustainability Score Preference: ${company.sustainabilityScore || 'Unknown'}/100
+- Typical Payment Terms: ${company.paymentTermsTypical || 30} days
+
+## SUPPLIER QUOTE vs MARKET
+${quoteContext}
+
+## PAYMENT TERMS OFFERED
+${paymentTerms ? `${paymentTerms} days` : 'Not specified'}
+
+Calculate how attractive this quote is to the buyer. Consider:
+1. Price competitiveness vs market rates
+2. Quality alignment with buyer standards
+3. Delivery times vs industry norms
+4. Payment terms comparison
+
+Return ONLY the JSON object with scores and actionable recommendations.`;
 
   try {
+    console.log("🎯 Calculating attractiveness...");
     const response = await callGemini(userQuery, systemPrompt, false);
-    return extractJSON<AttractivenessResult>(response);
+    const result = extractJSON<AttractivenessResult>(response);
+    console.log("🎯 Attractiveness result:", result);
+    return result;
   } catch (error) {
     console.error("Error calculating attractiveness:", error);
     return null;
