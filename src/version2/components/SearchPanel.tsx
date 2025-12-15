@@ -1,4 +1,5 @@
 import { Search, Building2, Package, Loader2 } from 'lucide-react';
+import { useTheme } from '../../ThemeContext';
 
 interface SearchPanelProps {
   companyQuery: string;
@@ -21,6 +22,9 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
   isSearchingCompany,
   isSearchingParts
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const handleCompanyKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && companyQuery.trim()) {
       onCompanySearch();
@@ -33,12 +37,26 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
     }
   };
 
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: isDark ? '#334155' : '#ffffff',
+    color: isDark ? '#f1f5f9' : '#1e293b',
+    borderColor: isDark ? '#475569' : '#cbd5e1'
+  };
+
+  const labelStyle: React.CSSProperties = {
+    color: isDark ? '#cbd5e1' : '#334155'
+  };
+
+  const helperStyle: React.CSSProperties = {
+    color: isDark ? '#94a3b8' : '#64748b'
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Company Search */}
       <div className="space-y-2">
-        <label className="flex items-center text-sm font-medium text-slate-700">
-          <Building2 size={16} className="mr-2 text-cyan-600" />
+        <label className="flex items-center text-sm font-medium" style={labelStyle}>
+          <Building2 size={16} className="mr-2" style={{ color: isDark ? '#22d3ee' : '#0891b2' }} />
           Search Company
         </label>
         <div className="relative">
@@ -48,13 +66,14 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             onChange={(e) => onCompanyChange(e.target.value)}
             onKeyPress={handleCompanyKeyPress}
             placeholder="e.g., Toyota, Tesla, Apple..."
-            className="w-full bg-white text-slate-800 px-4 py-3 pr-12 rounded-xl border border-slate-300 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+            className="w-full px-4 py-3 pr-12 rounded-xl border focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm"
+            style={inputStyle}
             disabled={isSearchingCompany}
           />
           <button
             onClick={onCompanySearch}
             disabled={isSearchingCompany || !companyQuery.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
             {isSearchingCompany ? (
               <Loader2 size={18} className="animate-spin text-white" />
@@ -63,13 +82,13 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             )}
           </button>
         </div>
-        <p className="text-xs text-slate-500">Search for buyer company to analyze their procurement profile</p>
+        <p className="text-xs" style={helperStyle}>Search for buyer company to analyze their procurement profile</p>
       </div>
 
       {/* Parts/Materials Search */}
       <div className="space-y-2">
-        <label className="flex items-center text-sm font-medium text-slate-700">
-          <Package size={16} className="mr-2 text-emerald-600" />
+        <label className="flex items-center text-sm font-medium" style={labelStyle}>
+          <Package size={16} className="mr-2" style={{ color: isDark ? '#34d399' : '#059669' }} />
           Search Parts / Materials
         </label>
         <div className="relative">
@@ -79,13 +98,14 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             onChange={(e) => onPartsChange(e.target.value)}
             onKeyPress={handlePartsKeyPress}
             placeholder="e.g., Aluminum sheets, Steel coils, Semiconductors..."
-            className="w-full bg-white text-slate-800 px-4 py-3 pr-12 rounded-xl border border-slate-300 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-400 shadow-sm"
+            className="w-full px-4 py-3 pr-12 rounded-xl border focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all shadow-sm"
+            style={inputStyle}
             disabled={isSearchingParts}
           />
           <button
             onClick={onPartsSearch}
             disabled={isSearchingParts || !partsQuery.trim()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg transition-colors"
           >
             {isSearchingParts ? (
               <Loader2 size={18} className="animate-spin text-white" />
@@ -94,9 +114,8 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             )}
           </button>
         </div>
-        <p className="text-xs text-slate-500">Search for parts or materials to get real-time pricing</p>
+        <p className="text-xs" style={helperStyle}>Search for parts or materials to get real-time pricing</p>
       </div>
     </div>
   );
 };
-
