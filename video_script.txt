@@ -1,0 +1,34 @@
+As a supplier, have you ever submitted a quote and wondered, am I too expensive? Too cheap? Will the buyer even consider my offer?
+
+Meet the AI Quote Analyzer. A real-time tool that tells you exactly how competitive your quote is before you submit it.
+
+Traditional quoting is a guessing game. You don't know current market prices. You don't know what the buyer really prioritizes. And you definitely don't know how you stack up against competitors.
+
+This leads to lost deals. Either you price too high and lose to competition, or you price too low and leave money on the table.
+
+The AI Quote Analyzer solves this in three simple steps.
+
+First, search for the materials or parts you're quoting, like steel, aluminum, or semiconductors. The system instantly fetches real-time market prices from across the industry.
+
+Next, enter your quote prices. The app immediately shows you whether you're above or below market, with exact percentages. You can also specify your delivery times, quality scores, and payment terms.
+
+Finally, search for your target buyer, like Toyota, Tesla, or Apple. The AI pulls their procurement profile, including what they prioritize. Is it price? Quality? Speed? Sustainability?
+
+Hit analyze, and within seconds you get your Attractiveness Score. A zero to one hundred rating of how likely the buyer is to accept your quote.
+
+But it doesn't stop at a number. You get a full breakdown.
+
+Price Competitiveness shows how your prices compare to market rates. Quality Alignment tells you if your quality meets their standards. Delivery Reliability shows if your lead times are competitive. And Sustainability Fit is important for ESG-focused buyers.
+
+Plus, you get AI-powered recommendations. Specific, actionable advice on how to improve your quote. Like lower your aluminum price by five percent to match market. Or highlight your ISO certifications to appeal to Toyota's quality focus.
+
+Under the hood, this is powered by Google's Gemini AI with real-time web search. Every search pulls live data. No outdated spreadsheets. No stale databases. Just current market intelligence.
+
+It's like having a procurement analyst, market researcher, and pricing strategist, all in one tool.
+
+Stop guessing. Start winning more quotes.
+
+Try the AI Quote Analyzer today. Search any material, enter your price, and know your competitive position in seconds.
+
+Because in procurement, information is power. And now that power is in your hands.
+
