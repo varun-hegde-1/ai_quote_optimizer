@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, Clock, Award, Package, TrendingDown, TrendingUp, Minus, Edit3 } from 'lucide-react';
+import { DollarSign, Clock, Package, TrendingDown, TrendingUp, Minus, Edit3 } from 'lucide-react';
 import type { PartPricing, SupplierQuoteItem } from '../types';
+import { useTheme } from '../../ThemeContext';
 
 interface SupplierQuoteInputProps {
   marketParts: PartPricing[];
@@ -15,6 +16,8 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
   paymentTerms,
   onPaymentTermsChange
 }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [quotes, setQuotes] = useState<SupplierQuoteItem[]>([]);
 
   // Initialize quotes from market parts
@@ -46,12 +49,12 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
     return diff;
   };
 
-  const getPriceDiffColor = (diff: number) => {
-    if (diff < -5) return 'text-emerald-600'; // Much cheaper
-    if (diff < 0) return 'text-green-600';    // Cheaper
-    if (diff === 0) return 'text-slate-500';  // Same
-    if (diff < 5) return 'text-amber-600';    // Slightly more
-    return 'text-red-600';                     // Much more expensive
+  const getPriceDiffColor = (diff: number): string => {
+    if (diff < -5) return isDark ? '#34d399' : '#059669'; // Much cheaper
+    if (diff < 0) return isDark ? '#4ade80' : '#16a34a';   // Cheaper
+    if (diff === 0) return isDark ? '#94a3b8' : '#64748b'; // Same
+    if (diff < 5) return isDark ? '#fbbf24' : '#d97706';   // Slightly more
+    return isDark ? '#f87171' : '#dc2626';                  // Much more expensive
   };
 
   const getPriceDiffIcon = (diff: number) => {
@@ -64,18 +67,54 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
     return null;
   }
 
+  const cardBg = isDark ? '#1e293b' : '#ffffff';
+  const borderColor = isDark ? '#334155' : '#e2e8f0';
+  const headerGradient = isDark 
+    ? 'linear-gradient(to right, rgba(146, 64, 14, 0.3), rgba(154, 52, 18, 0.3))' 
+    : 'linear-gradient(to right, #fffbeb, #fff7ed)';
+  const textPrimary = isDark ? '#f1f5f9' : '#1e293b';
+  const textSecondary = isDark ? '#94a3b8' : '#64748b';
+  const headerBg = isDark ? 'rgba(51, 65, 85, 0.5)' : '#f8fafc';
+  const inputBg = isDark ? '#334155' : '#ffffff';
+  const inputBorder = isDark ? '#475569' : '#cbd5e1';
+
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: inputBg,
+    color: textPrimary,
+    borderColor: inputBorder
+  };
+
+  const amberInputStyle: React.CSSProperties = {
+    backgroundColor: inputBg,
+    color: textPrimary,
+    borderColor: isDark ? '#b45309' : '#fcd34d'
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
+    <div 
+      className="rounded-2xl border overflow-hidden shadow-lg"
+      style={{ backgroundColor: cardBg, borderColor }}
+    >
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-slate-200">
-        <h3 className="text-xl font-bold text-slate-800 flex items-center">
-          <Edit3 size={20} className="mr-2 text-amber-600" />
+      <div 
+        className="px-6 py-4 border-b"
+        style={{ background: headerGradient, borderColor }}
+      >
+        <h3 className="text-xl font-bold flex items-center" style={{ color: textPrimary }}>
+          <Edit3 size={20} className="mr-2" style={{ color: isDark ? '#fbbf24' : '#d97706' }} />
           Your Supplier Quote
-          <span className="ml-2 text-xs font-normal text-amber-700 bg-amber-100 px-2 py-1 rounded-full border border-amber-200">
+          <span 
+            className="ml-2 text-xs font-normal px-2 py-1 rounded-full border"
+            style={{
+              color: isDark ? '#fcd34d' : '#92400e',
+              backgroundColor: isDark ? 'rgba(251, 191, 36, 0.2)' : '#fef3c7',
+              borderColor: isDark ? '#b45309' : '#fde68a'
+            }}
+          >
             Enter your prices
           </span>
         </h3>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-sm mt-1" style={{ color: textSecondary }}>
           Enter your proposed prices to see how competitive your quote is against market rates.
         </p>
       </div>
@@ -84,14 +123,14 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="text-left px-6 py-3 text-xs font-semibold text-slate-600 uppercase">Part/Material</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Market Price</th>
-              <th className="text-right px-4 py-3 text-xs font-semibold text-amber-600 uppercase">Your Price</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Difference</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Qty</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Delivery</th>
-              <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 uppercase">Quality</th>
+            <tr style={{ borderBottom: `1px solid ${borderColor}`, backgroundColor: headerBg }}>
+              <th className="text-left px-6 py-3 text-xs font-semibold uppercase" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>Part/Material</th>
+              <th className="text-right px-4 py-3 text-xs font-semibold uppercase" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>Market Price</th>
+              <th className="text-right px-4 py-3 text-xs font-semibold uppercase" style={{ color: isDark ? '#fbbf24' : '#d97706' }}>Your Price</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold uppercase" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>Difference</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold uppercase" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>Qty</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold uppercase" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>Delivery</th>
+              <th className="text-center px-4 py-3 text-xs font-semibold uppercase" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>Quality</th>
             </tr>
           </thead>
           <tbody>
@@ -99,35 +138,43 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
               const priceDiff = getPriceDiff(quote.marketPrice, quote.supplierPrice);
               
               return (
-                <tr key={idx} className="border-b border-slate-100 hover:bg-slate-50">
+                <tr 
+                  key={idx} 
+                  className="transition-colors"
+                  style={{ borderBottom: `1px solid ${isDark ? '#1e293b' : '#f1f5f9'}` }}
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center">
-                      <Package size={16} className="mr-2 text-slate-400" />
-                      <span className="font-medium text-slate-800">{quote.partName}</span>
+                      <Package size={16} className="mr-2" style={{ color: isDark ? '#64748b' : '#94a3b8' }} />
+                      <span className="font-medium" style={{ color: textPrimary }}>{quote.partName}</span>
                     </div>
-                    <span className="text-xs text-slate-500">{quote.unit}</span>
+                    <span className="text-xs" style={{ color: textSecondary }}>{quote.unit}</span>
                   </td>
                   
                   <td className="px-4 py-4 text-right">
-                    <span className="text-slate-600">
+                    <span style={{ color: isDark ? '#cbd5e1' : '#475569' }}>
                       ${quote.marketPrice.toLocaleString()}
                     </span>
                   </td>
                   
                   <td className="px-4 py-4">
                     <div className="flex items-center justify-end">
-                      <DollarSign size={14} className="text-amber-600" />
+                      <DollarSign size={14} style={{ color: isDark ? '#fbbf24' : '#d97706' }} />
                       <input
                         type="number"
                         value={quote.supplierPrice}
                         onChange={(e) => updateQuote(idx, 'supplierPrice', parseFloat(e.target.value) || 0)}
-                        className="w-28 bg-white text-slate-800 text-right px-2 py-1.5 rounded border border-amber-300 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none shadow-sm"
+                        className="w-28 text-right px-2 py-1.5 rounded border focus:ring-1 focus:ring-amber-500 outline-none shadow-sm"
+                        style={amberInputStyle}
                       />
                     </div>
                   </td>
                   
                   <td className="px-4 py-4 text-center">
-                    <span className={`flex items-center justify-center gap-1 text-sm font-medium ${getPriceDiffColor(priceDiff)}`}>
+                    <span 
+                      className="flex items-center justify-center gap-1 text-sm font-medium"
+                      style={{ color: getPriceDiffColor(priceDiff) }}
+                    >
                       {getPriceDiffIcon(priceDiff)}
                       {priceDiff > 0 ? '+' : ''}{priceDiff.toFixed(1)}%
                     </span>
@@ -138,7 +185,8 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
                       type="number"
                       value={quote.quantity}
                       onChange={(e) => updateQuote(idx, 'quantity', parseInt(e.target.value) || 0)}
-                      className="w-20 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
+                      className="w-20 text-center px-2 py-1.5 rounded border focus:border-cyan-500 outline-none shadow-sm"
+                      style={inputStyle}
                     />
                   </td>
                   
@@ -148,9 +196,10 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
                         type="number"
                         value={quote.deliveryDays}
                         onChange={(e) => updateQuote(idx, 'deliveryDays', parseInt(e.target.value) || 0)}
-                        className="w-16 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
+                        className="w-16 text-center px-2 py-1.5 rounded border focus:border-cyan-500 outline-none shadow-sm"
+                        style={inputStyle}
                       />
-                      <span className="text-xs text-slate-500">days</span>
+                      <span className="text-xs" style={{ color: textSecondary }}>days</span>
                     </div>
                   </td>
                   
@@ -162,9 +211,10 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
                         min={0}
                         max={100}
                         onChange={(e) => updateQuote(idx, 'qualityScore', Math.min(100, parseInt(e.target.value) || 0))}
-                        className="w-16 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
+                        className="w-16 text-center px-2 py-1.5 rounded border focus:border-cyan-500 outline-none shadow-sm"
+                        style={inputStyle}
                       />
-                      <span className="text-xs text-slate-500">%</span>
+                      <span className="text-xs" style={{ color: textSecondary }}>%</span>
                     </div>
                   </td>
                 </tr>
@@ -175,45 +225,61 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
       </div>
 
       {/* Payment Terms */}
-      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
+      <div 
+        className="px-6 py-4 border-t"
+        style={{ backgroundColor: headerBg, borderColor }}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Clock size={18} className="mr-2 text-slate-500" />
-            <span className="text-sm text-slate-700">Payment Terms</span>
+            <Clock size={18} className="mr-2" style={{ color: textSecondary }} />
+            <span className="text-sm" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>Payment Terms</span>
           </div>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={paymentTerms}
               onChange={(e) => onPaymentTermsChange(parseInt(e.target.value) || 0)}
-              className="w-20 bg-white text-slate-800 text-center px-2 py-1.5 rounded border border-slate-300 focus:border-cyan-500 outline-none shadow-sm"
+              className="w-20 text-center px-2 py-1.5 rounded border focus:border-cyan-500 outline-none shadow-sm"
+              style={inputStyle}
             />
-            <span className="text-sm text-slate-500">days</span>
+            <span className="text-sm" style={{ color: textSecondary }}>days</span>
           </div>
         </div>
         
         {/* Quick Summary */}
         <div className="mt-4 grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-3 text-center border border-slate-200 shadow-sm">
-            <p className="text-xs text-slate-500">Avg Price Diff</p>
-            <p className={`text-lg font-bold ${getPriceDiffColor(
-              quotes.reduce((sum, q) => sum + getPriceDiff(q.marketPrice, q.supplierPrice), 0) / (quotes.length || 1)
-            )}`}>
+          <div 
+            className="rounded-lg p-3 text-center border shadow-sm"
+            style={{ backgroundColor: cardBg, borderColor }}
+          >
+            <p className="text-xs" style={{ color: textSecondary }}>Avg Price Diff</p>
+            <p 
+              className="text-lg font-bold"
+              style={{ color: getPriceDiffColor(
+                quotes.reduce((sum, q) => sum + getPriceDiff(q.marketPrice, q.supplierPrice), 0) / (quotes.length || 1)
+              )}}
+            >
               {(() => {
                 const avgDiff = quotes.reduce((sum, q) => sum + getPriceDiff(q.marketPrice, q.supplierPrice), 0) / (quotes.length || 1);
                 return `${avgDiff > 0 ? '+' : ''}${avgDiff.toFixed(1)}%`;
               })()}
             </p>
           </div>
-          <div className="bg-white rounded-lg p-3 text-center border border-slate-200 shadow-sm">
-            <p className="text-xs text-slate-500">Avg Quality</p>
-            <p className="text-lg font-bold text-cyan-600">
+          <div 
+            className="rounded-lg p-3 text-center border shadow-sm"
+            style={{ backgroundColor: cardBg, borderColor }}
+          >
+            <p className="text-xs" style={{ color: textSecondary }}>Avg Quality</p>
+            <p className="text-lg font-bold" style={{ color: isDark ? '#22d3ee' : '#0891b2' }}>
               {(quotes.reduce((sum, q) => sum + q.qualityScore, 0) / (quotes.length || 1)).toFixed(0)}%
             </p>
           </div>
-          <div className="bg-white rounded-lg p-3 text-center border border-slate-200 shadow-sm">
-            <p className="text-xs text-slate-500">Avg Delivery</p>
-            <p className="text-lg font-bold text-violet-600">
+          <div 
+            className="rounded-lg p-3 text-center border shadow-sm"
+            style={{ backgroundColor: cardBg, borderColor }}
+          >
+            <p className="text-xs" style={{ color: textSecondary }}>Avg Delivery</p>
+            <p className="text-lg font-bold" style={{ color: isDark ? '#a78bfa' : '#7c3aed' }}>
               {(quotes.reduce((sum, q) => sum + q.deliveryDays, 0) / (quotes.length || 1)).toFixed(0)} days
             </p>
           </div>
@@ -222,4 +288,3 @@ export const SupplierQuoteInput: React.FC<SupplierQuoteInputProps> = ({
     </div>
   );
 };
-

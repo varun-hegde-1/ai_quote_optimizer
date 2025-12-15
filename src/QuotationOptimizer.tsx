@@ -25,6 +25,7 @@ import {
   Mic,
   MicOff
 } from "lucide-react";
+import { useThemeState } from "./App";
 
 // --- Type Definitions ---
 
@@ -625,9 +626,10 @@ const performOptimization = (supplierQuote: SupplierQuote, buyerFocus: string): 
 interface RecommendedTargetsProps {
   lineItems: LineItem[];
   buyerFocus: string;
+  isDark?: boolean;
 }
 
-const RecommendedTargets: React.FC<RecommendedTargetsProps> = ({ lineItems, buyerFocus }) => {
+const RecommendedTargets: React.FC<RecommendedTargetsProps> = ({ lineItems, buyerFocus, isDark = false }) => {
   if (!lineItems || lineItems.length === 0) return null;
 
   const targetAttributes = [
@@ -648,11 +650,17 @@ const RecommendedTargets: React.FC<RecommendedTargetsProps> = ({ lineItems, buye
   });
 
   return (
-    <div className="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
-      <h4 className="text-lg font-bold text-green-700 mb-3 flex items-center">
+    <div 
+      className="mt-6 p-4 rounded-xl border"
+      style={{
+        backgroundColor: isDark ? 'rgba(34, 197, 94, 0.15)' : '#f0fdf4',
+        borderColor: isDark ? '#15803d' : '#bbf7d0'
+      }}
+    >
+      <h4 className="text-lg font-bold mb-3 flex items-center" style={{ color: isDark ? '#4ade80' : '#15803d' }}>
         <Target size={18} className="mr-2" /> Recommended Competitive Targets (Per Item)
       </h4>
-      <p className="text-xs text-slate-600 mb-4">
+      <p className="text-xs mb-4" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>
         Targets are based on the current line item's inputs and **{buyerFocus}** priority.
       </p>
 
@@ -664,16 +672,23 @@ const RecommendedTargets: React.FC<RecommendedTargetsProps> = ({ lineItems, buye
           const targets = generateCompetitiveTargets(historicalData, buyerFocus, item.region);
 
           return (
-            <div key={item.id} className="border border-slate-200 rounded-lg p-3 bg-white shadow-sm">
-              <h5 className="font-bold text-sm text-indigo-600 mb-2">
+            <div 
+              key={item.id} 
+              className="rounded-lg p-3 shadow-sm border"
+              style={{
+                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                borderColor: isDark ? '#475569' : '#e2e8f0'
+              }}
+            >
+              <h5 className="font-bold text-sm mb-2" style={{ color: isDark ? '#818cf8' : '#4f46e5' }}>
                 Item {index + 1}: {item.itemDesc} ({item.itemId})
-                <span className="ml-2 text-xs font-normal text-red-500">({item.region} Target)</span>
+                <span className="ml-2 text-xs font-normal" style={{ color: isDark ? '#f87171' : '#ef4444' }}>({item.region} Target)</span>
               </h5>
               <div className="grid grid-cols-3 gap-2 text-xs">
                 {targetAttributes.map((attr) => (
                   <div key={attr.key} className="flex flex-col">
-                    <span className="text-slate-500">{attr.label} Target:</span>
-                    <span className="font-semibold text-green-600">
+                    <span style={{ color: isDark ? '#94a3b8' : '#64748b' }}>{attr.label} Target:</span>
+                    <span className="font-semibold" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
                       {targets[attr.key]} {attr.unit}
                     </span>
                   </div>
@@ -698,6 +713,8 @@ const ProposalDraftGenerator: React.FC<ProposalDraftGeneratorProps> = ({
   buyerFocus,
   optimizationResult
 }) => {
+  const theme = useThemeState();
+  const isDark = theme === 'dark';
   const [draft, setDraft] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -754,9 +771,15 @@ const ProposalDraftGenerator: React.FC<ProposalDraftGeneratorProps> = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex-1 flex flex-col">
-      <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center">
-        <Bot size={20} className="mr-2 text-pink-600" /> Proposal Draft Generator ✨
+    <div 
+      className="p-6 rounded-xl shadow-lg border flex-1 flex flex-col"
+      style={{
+        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+        borderColor: isDark ? '#334155' : '#e2e8f0'
+      }}
+    >
+      <h3 className="text-xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>
+        <Bot size={20} className="mr-2" style={{ color: isDark ? '#f472b6' : '#db2777' }} /> Proposal Draft Generator ✨
       </h3>
 
       <button
@@ -767,9 +790,15 @@ const ProposalDraftGenerator: React.FC<ProposalDraftGeneratorProps> = ({
         {isGenerating ? "Drafting..." : "Generate Tailored Proposal Draft"}
       </button>
 
-      <div className="bg-slate-50 p-4 rounded-lg flex-1 overflow-y-auto whitespace-pre-wrap text-slate-700 text-sm border-l-4 border-pink-500">
+      <div 
+        className="p-4 rounded-lg flex-1 overflow-y-auto whitespace-pre-wrap text-sm border-l-4 border-pink-500"
+        style={{
+          backgroundColor: isDark ? '#334155' : '#f8fafc',
+          color: isDark ? '#e2e8f0' : '#334155'
+        }}
+      >
         {draft || (
-          <p className="text-slate-500 italic">
+          <p className="italic" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
             Click the button above to generate a preliminary draft for your final quotation document, dynamically
             emphasizing {buyerFocus}.
           </p>
@@ -833,6 +862,8 @@ declare global {
 }
 
 const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) => {
+  const theme = useThemeState();
+  const isDark = theme === 'dark';
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
@@ -962,27 +993,46 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col flex-1">
-      <h3 className="text-xl font-bold text-indigo-600 mb-4 flex items-center border-b border-slate-200 pb-3">
+    <div 
+      className="p-6 rounded-xl shadow-lg border flex flex-col flex-1"
+      style={{
+        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+        borderColor: isDark ? '#334155' : '#e2e8f0'
+      }}
+    >
+      <h3 
+        className="text-xl font-bold mb-4 flex items-center border-b pb-3"
+        style={{ 
+          color: isDark ? '#818cf8' : '#4f46e5',
+          borderColor: isDark ? '#475569' : '#e2e8f0'
+        }}
+      >
         <Bot size={20} className="mr-2" /> AI Pricing Assistant ({buyerName})
       </h3>
 
       {/* Chat History */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4">
         {chatHistory.length === 0 ? (
-          <div className="text-center text-slate-500 mt-10">
+          <div className="text-center mt-10" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
             Ask me about competitor pricing, market rates, or price difference for {buyerName}.
           </div>
         ) : (
           chatHistory.map((msg, index) => (
             <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-xs md:max-w-md p-3 rounded-lg shadow-md ${
-                  msg.role === "user" ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-700 border border-slate-200"
-                }`}>
+                className="max-w-xs md:max-w-md p-3 rounded-lg shadow-md"
+                style={msg.role === "user" 
+                  ? { backgroundColor: '#4f46e5', color: '#ffffff' } 
+                  : { 
+                      backgroundColor: isDark ? '#334155' : '#f1f5f9', 
+                      color: isDark ? '#e2e8f0' : '#334155',
+                      border: `1px solid ${isDark ? '#475569' : '#e2e8f0'}`
+                    }
+                }
+              >
                 <div className="flex items-center text-sm font-semibold mb-1">
                   {msg.role === "ai" ? (
-                    <Bot size={14} className="mr-1 text-yellow-600" />
+                    <Bot size={14} className="mr-1" style={{ color: isDark ? '#fbbf24' : '#ca8a04' }} />
                   ) : (
                     <User size={14} className="mr-1" />
                   )}
@@ -997,7 +1047,7 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
       </div>
 
       {/* Input Area */}
-      <div className="flex space-x-3 pt-4 border-t border-slate-200">
+      <div className="flex space-x-3 pt-4 border-t" style={{ borderColor: isDark ? '#475569' : '#e2e8f0' }}>
         <div className="flex-1 relative">
           <input
             type="text"
@@ -1007,9 +1057,12 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
               if (e.key === "Enter") handleAIChat(input);
             }}
             placeholder={isListening ? "Listening... speak now" : `Ask about ${buyerName}'s pricing...`}
-            className={`w-full bg-white text-slate-800 p-3 rounded-lg border ${
-              isListening ? "border-red-500 ring-2 ring-red-500/50" : "border-slate-300"
-            } focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200`}
+            className="w-full p-3 rounded-lg border focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+            style={{
+              backgroundColor: isDark ? '#334155' : '#ffffff',
+              color: isDark ? '#f1f5f9' : '#1e293b',
+              borderColor: isListening ? '#ef4444' : (isDark ? '#475569' : '#cbd5e1')
+            }}
             disabled={isThinking || isListening}
           />
           {isListening && (
@@ -1026,11 +1079,12 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
             onClick={toggleListening}
             disabled={isThinking}
             title={isListening ? "Stop listening" : "Start voice input"}
-            className={`p-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-              isListening
-                ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
-                : "bg-slate-200 hover:bg-slate-300 text-slate-600 hover:text-slate-800"
-            }`}>
+            className="p-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={isListening 
+              ? { backgroundColor: '#ef4444', color: '#ffffff' }
+              : { backgroundColor: isDark ? '#334155' : '#e2e8f0', color: isDark ? '#cbd5e1' : '#475569' }
+            }
+          >
             {isListening ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
         )}
@@ -1051,9 +1105,10 @@ const AIPricingAssistant: React.FC<AIPricingAssistantProps> = ({ buyerName }) =>
 interface MaterialRejectionChartProps {
   buyerName: string;
   rejectionData: MaterialRejection[];
+  isDark?: boolean;
 }
 
-const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ buyerName, rejectionData }) => {
+const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ buyerName, rejectionData, isDark = false }) => {
   const getColor = (rate: number) => {
     if (rate >= 10) return "bg-red-500";
     if (rate >= 5) return "bg-yellow-500";
@@ -1061,20 +1116,29 @@ const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ buyerNa
   };
 
   return (
-    <div className="p-4 bg-slate-100 rounded-xl shadow-inner border border-slate-200">
-      <h4 className="text-xl font-bold text-indigo-600 mb-4 flex items-center">
+    <div 
+      className="p-4 rounded-xl shadow-inner border"
+      style={{
+        backgroundColor: isDark ? 'rgba(51, 65, 85, 0.5)' : '#f1f5f9',
+        borderColor: isDark ? '#475569' : '#e2e8f0'
+      }}
+    >
+      <h4 className="text-xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#818cf8' : '#4f46e5' }}>
         <Factory size={20} className="mr-2" /> Quality Rejection Rates
       </h4>
-      <p className="text-sm text-slate-600 mb-4">Historical rejection percentage per material for {buyerName}.</p>
+      <p className="text-sm mb-4" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>Historical rejection percentage per material for {buyerName}.</p>
 
       <div className="space-y-4">
         {rejectionData.map((item, index) => (
           <div key={index} className="space-y-1">
             <div className="flex justify-between items-baseline">
-              <span className="text-sm font-semibold text-slate-800">{item.material}</span>
-              <span className="text-xs text-red-500 italic">Reason: {item.reason}</span>
+              <span className="text-sm font-semibold" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>{item.material}</span>
+              <span className="text-xs italic" style={{ color: isDark ? '#f87171' : '#ef4444' }}>Reason: {item.reason}</span>
             </div>
-            <div className="h-6 bg-slate-300 rounded-full overflow-hidden">
+            <div 
+              className="h-6 rounded-full overflow-hidden"
+              style={{ backgroundColor: isDark ? '#475569' : '#cbd5e1' }}
+            >
               <div
                 style={{ width: `${item.rejectionRate}%` }}
                 className={`h-full ${getColor(
@@ -1095,9 +1159,10 @@ const MaterialRejectionChart: React.FC<MaterialRejectionChartProps> = ({ buyerNa
 interface BuyerPerformanceChartProps {
   buyerName: string;
   performanceData: PerformanceData;
+  isDark?: boolean;
 }
 
-const BuyerPerformanceChart: React.FC<BuyerPerformanceChartProps> = ({ buyerName: _buyerName, performanceData }) => {
+const BuyerPerformanceChart: React.FC<BuyerPerformanceChartProps> = ({ buyerName: _buyerName, performanceData, isDark = false }) => {
   // Note: buyerName is available for future use if needed
   void _buyerName; // Suppress unused variable warning
   const allData = [...performanceData.historical, ...performanceData.forecast];
@@ -1114,15 +1179,24 @@ const BuyerPerformanceChart: React.FC<BuyerPerformanceChartProps> = ({ buyerName
   }));
 
   return (
-    <div className="p-4 bg-slate-100 rounded-xl shadow-inner border border-slate-200 h-96 flex flex-col">
-      <h4 className="text-xl font-bold text-green-600 mb-4 flex items-center">
+    <div 
+      className="p-4 rounded-xl shadow-inner border h-96 flex flex-col"
+      style={{
+        backgroundColor: isDark ? 'rgba(51, 65, 85, 0.5)' : '#f1f5f9',
+        borderColor: isDark ? '#475569' : '#e2e8f0'
+      }}
+    >
+      <h4 className="text-xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
         <LineChart size={20} className="mr-2" /> Market Performance (Annual Growth %)
       </h4>
 
-      <div className="flex-1 relative border-l border-b border-slate-300 mb-4 pt-4">
+      <div 
+        className="flex-1 relative border-l border-b mb-4 pt-4"
+        style={{ borderColor: isDark ? '#64748b' : '#cbd5e1' }}
+      >
         {/* Y-Axis Label */}
-        <div className="absolute top-0 -left-10 text-xs text-slate-500">+{maxGrowth.toFixed(0)}%</div>
-        <div className="absolute bottom-0 -left-10 text-xs text-slate-500">{minGrowth.toFixed(0)}%</div>
+        <div className="absolute top-0 -left-10 text-xs" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>+{maxGrowth.toFixed(0)}%</div>
+        <div className="absolute bottom-0 -left-10 text-xs" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>{minGrowth.toFixed(0)}%</div>
 
         <div className="flex justify-around h-full items-end">
           {dataPoints.map((d) => (
@@ -1130,23 +1204,28 @@ const BuyerPerformanceChart: React.FC<BuyerPerformanceChartProps> = ({ buyerName
               {/* Bar Visualization */}
               <div
                 style={{
-                  height: `${(Math.abs(d.growth) / maxGrowth) * 80}%`, // Scale based on max positive value
+                  height: `${(Math.abs(d.growth) / maxGrowth) * 80}%`,
                   marginTop: d.isNegative ? "auto" : "none"
                 }}
                 className={`w-3 rounded-t-sm transition-all duration-500 ${
                   d.isNegative ? "bg-red-500 self-start" : "bg-green-500 self-start"
                 }
-                                            ${d.isForecast ? "opacity-50 border border-dashed border-slate-400" : ""}
+                                            ${d.isForecast ? "opacity-50 border border-dashed" : ""}
                                             relative`}>
                 {/* Tooltip */}
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 p-1 px-2 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+                <div 
+                  className="absolute bottom-full left-1/2 transform -translate-x-1/2 p-1 px-2 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap"
+                  style={{ backgroundColor: isDark ? '#0f172a' : '#1e293b' }}
+                >
                   {d.growth.toFixed(1)}%
                 </div>
               </div>
 
               {/* X-Axis Label */}
               <span
-                className={`absolute bottom-[-20px] text-[10px] ${d.isForecast ? "text-indigo-600" : "text-slate-500"}`}>
+                className="absolute bottom-[-20px] text-[10px]"
+                style={{ color: d.isForecast ? (isDark ? '#818cf8' : '#4f46e5') : (isDark ? '#94a3b8' : '#64748b') }}
+              >
                 '{String(d.year).slice(-2)}
               </span>
             </div>
@@ -1155,10 +1234,10 @@ const BuyerPerformanceChart: React.FC<BuyerPerformanceChartProps> = ({ buyerName
       </div>
 
       <div className="flex justify-center space-x-6 text-sm mt-4">
-        <span className="flex items-center text-green-600 font-semibold">
+        <span className="flex items-center font-semibold" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
           <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div> Historical Growth
         </span>
-        <span className="flex items-center text-indigo-600 font-semibold">
+        <span className="flex items-center font-semibold" style={{ color: isDark ? '#818cf8' : '#4f46e5' }}>
           <div className="w-3 h-3 bg-green-500 rounded-full mr-2 opacity-50 border border-dashed"></div> 5 Year Forecast
         </span>
       </div>
@@ -1213,6 +1292,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   realRejectionData,
   isLoadingRealData = false
 }) => {
+  const theme = useThemeState();
+  const isDark = theme === 'dark';
   const [selectedBuyer, setSelectedBuyer] = useState(BUYER_PROFILES[0].name);
   const [chartStyle, setChartStyle] = useState<"horizontal" | "vertical">("horizontal");
 
@@ -1226,8 +1307,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     <div className="space-y-3">
       {buyerData.map((dataPoint) => (
         <div key={dataPoint.year} className="flex items-center">
-          <span className="text-slate-600 w-16 text-right mr-4 text-sm font-bold">{dataPoint.year}</span>
-          <div className="flex flex-1 h-8 rounded-lg overflow-hidden shadow-md border border-slate-200">
+          <span className="w-16 text-right mr-4 text-sm font-bold" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>{dataPoint.year}</span>
+          <div 
+            className="flex flex-1 h-8 rounded-lg overflow-hidden shadow-md border"
+            style={{ borderColor: isDark ? '#475569' : '#e2e8f0' }}
+          >
             {/* Awarded Bar */}
             <div
               style={{ width: `${dataPoint.awarded}%` }}
@@ -1247,7 +1331,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   );
 
   const renderVerticalChart = () => (
-    <div className="flex justify-between items-end h-64 border-b border-l border-slate-300 p-2">
+    <div className="flex justify-between items-end h-64 border-b border-l p-2" style={{ borderColor: isDark ? '#64748b' : '#cbd5e1' }}>
       {buyerData.map((dataPoint) => {
         const totalHeight = 240; // Max height in px
         const awardedHeight = (dataPoint.awarded / 100) * totalHeight;
@@ -1269,7 +1353,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 {dataPoint.awarded > 5 ? `${dataPoint.awarded}%` : ""}
               </div>
             </div>
-            <span className="text-slate-600 mt-2 text-xs font-bold">{dataPoint.year}</span>
+            <span className="text-slate-600 dark:text-slate-300 mt-2 text-xs font-bold">{dataPoint.year}</span>
           </div>
         );
       })}
@@ -1280,23 +1364,37 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   const isUsingRealRejection = !!realRejectionData?.[selectedBuyer];
 
   return (
-    <div className="mt-12 p-8 bg-white rounded-xl shadow-lg border border-slate-200">
+    <div 
+      className="mt-12 p-8 rounded-xl shadow-lg border"
+      style={{
+        backgroundColor: isDark ? '#1e293b' : '#ffffff',
+        borderColor: isDark ? '#334155' : '#e2e8f0'
+      }}
+    >
       <div className="flex justify-between items-center mb-6">
-        <h2 className="3xl font-bold text-yellow-600 flex items-center">
+        <h2 className="text-2xl font-bold flex items-center" style={{ color: isDark ? '#fbbf24' : '#ca8a04' }}>
           <BarChart3 size={28} className="mr-3" /> Quotation Performance Analysis
         </h2>
         {/* Real-time data indicator */}
         <div className="flex items-center space-x-2">
           {isLoadingRealData ? (
-            <span className="flex items-center text-xs text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+            <span 
+              className="flex items-center text-xs px-3 py-1 rounded-full"
+              style={{ 
+                color: isDark ? '#60a5fa' : '#2563eb',
+                backgroundColor: isDark ? 'rgba(59, 130, 246, 0.2)' : '#dbeafe'
+              }}
+            >
               <Loader2 size={12} className="animate-spin mr-1" /> Fetching live data...
             </span>
           ) : (
-            <span className={`flex items-center text-xs px-3 py-1 rounded-full ${
-              isUsingRealPerformance || isUsingRealRejection 
-                ? "text-green-600 bg-green-100" 
-                : "text-slate-500 bg-slate-200"
-            }`}>
+            <span 
+              className="flex items-center text-xs px-3 py-1 rounded-full"
+              style={isUsingRealPerformance || isUsingRealRejection 
+                ? { color: isDark ? '#4ade80' : '#16a34a', backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7' }
+                : { color: isDark ? '#94a3b8' : '#64748b', backgroundColor: isDark ? '#334155' : '#e2e8f0' }
+              }
+            >
               <Globe size={12} className="mr-1" />
               {isUsingRealPerformance || isUsingRealRejection ? "Live Data" : "Mock Data"}
             </span>
@@ -1308,14 +1406,20 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         {/* 1. Historical Bid Chart (Left Side) */}
         <div className="w-1/2 space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="xl font-bold text-slate-800">Bid Success Rate ({selectedBuyer})</h3>
+            <h3 className="text-xl font-bold" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>Bid Success Rate ({selectedBuyer})</h3>
             {/* Buyer Selector */}
             <div className="flex items-center space-x-4">
-              <label className="text-sm font-semibold text-slate-700">Buyer:</label>
+              <label className="text-sm font-semibold" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>Buyer:</label>
               <select
                 value={selectedBuyer}
                 onChange={(e) => setSelectedBuyer(e.target.value)}
-                className="bg-white text-slate-800 p-2 rounded-md focus:ring-yellow-500 focus:border-yellow-500 border border-slate-300">
+                className="p-2 rounded-md focus:ring-yellow-500 focus:border-yellow-500 border"
+                style={{
+                  backgroundColor: isDark ? '#334155' : '#ffffff',
+                  color: isDark ? '#f1f5f9' : '#1e293b',
+                  borderColor: isDark ? '#475569' : '#cbd5e1'
+                }}
+              >
                 {BUYER_PROFILES.map((p) => (
                   <option key={p.name} value={p.name}>
                     {p.name}
@@ -1327,20 +1431,24 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
           {/* Chart Style Selector */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-slate-500">View Style:</span>
+            <span className="text-sm" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>View Style:</span>
             <button
               onClick={() => setChartStyle("horizontal")}
-              className={`p-2 rounded-md transition-colors duration-200 ${
-                chartStyle === "horizontal" ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-600 hover:bg-slate-300"
-              }`}
+              className="p-2 rounded-md transition-colors duration-200"
+              style={chartStyle === "horizontal" 
+                ? { backgroundColor: '#4f46e5', color: '#ffffff' }
+                : { backgroundColor: isDark ? '#334155' : '#e2e8f0', color: isDark ? '#cbd5e1' : '#475569' }
+              }
               title="Horizontal Bar Chart">
               <LayoutList size={20} />
             </button>
             <button
               onClick={() => setChartStyle("vertical")}
-              className={`p-2 rounded-md transition-colors duration-200 ${
-                chartStyle === "vertical" ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-600 hover:bg-slate-300"
-              }`}
+              className="p-2 rounded-md transition-colors duration-200"
+              style={chartStyle === "vertical" 
+                ? { backgroundColor: '#4f46e5', color: '#ffffff' }
+                : { backgroundColor: isDark ? '#334155' : '#e2e8f0', color: isDark ? '#cbd5e1' : '#475569' }
+              }
               title="Vertical Bar Chart">
               <ArrowLeftRight size={20} className="rotate-90" />
             </button>
@@ -1350,10 +1458,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           {chartStyle === "horizontal" ? renderHorizontalChart() : renderVerticalChart()}
 
           <div className="flex justify-center space-x-6 text-sm">
-            <span className="flex items-center text-green-600 font-semibold">
+            <span className="flex items-center font-semibold" style={{ color: isDark ? '#4ade80' : '#16a34a' }}>
               <div className="w-3 h-3 bg-green-600 rounded-full mr-2"></div> Awarded Quotations
             </span>
-            <span className="flex items-center text-red-600 font-semibold">
+            <span className="flex items-center font-semibold" style={{ color: isDark ? '#f87171' : '#dc2626' }}>
               <div className="w-3 h-3 bg-red-600 rounded-full mr-2"></div> Rejected Quotations
             </span>
           </div>
@@ -1361,8 +1469,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
 
         {/* 2. Market Performance and Rejection (Right Side) */}
         <div className="w-1/2 flex flex-col space-y-6">
-          <BuyerPerformanceChart buyerName={selectedBuyer} performanceData={marketPerformanceData} />
-          <MaterialRejectionChart buyerName={selectedBuyer} rejectionData={rejectionData} />
+          <BuyerPerformanceChart buyerName={selectedBuyer} performanceData={marketPerformanceData} isDark={isDark} />
+          <MaterialRejectionChart buyerName={selectedBuyer} rejectionData={rejectionData} isDark={isDark} />
         </div>
       </div>
     </div>
@@ -1376,13 +1484,15 @@ interface QuotationTableInputProps {
   setLineItems: React.Dispatch<React.SetStateAction<LineItem[]>>;
   onLineItemChange: (firstItem: LineItem) => void;
   isLoading: boolean;
+  isDark?: boolean;
 }
 
 const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
   lineItems,
   setLineItems,
   onLineItemChange,
-  isLoading
+  isLoading,
+  isDark = false
 }) => {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -1431,42 +1541,61 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
     }
   };
 
-  const inputClasses =
-    "bg-white text-slate-800 p-1 text-xs rounded border border-slate-300 focus:ring-indigo-500 focus:border-indigo-500 w-full";
-  const strategicClasses =
-    "bg-yellow-50 text-yellow-700 font-bold p-1 text-xs rounded border border-yellow-400 focus:ring-yellow-500 focus:border-yellow-500 w-full";
-  const headerClasses =
-    "p-2 text-left text-xs font-bold text-slate-600 bg-slate-100 sticky top-0 border-b border-slate-200";
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: isDark ? '#334155' : '#ffffff',
+    color: isDark ? '#f1f5f9' : '#1e293b',
+    borderColor: isDark ? '#475569' : '#cbd5e1'
+  };
+  
+  const strategicStyle: React.CSSProperties = {
+    backgroundColor: isDark ? 'rgba(234, 179, 8, 0.2)' : '#fefce8',
+    color: isDark ? '#fde047' : '#a16207',
+    borderColor: isDark ? '#ca8a04' : '#facc15'
+  };
+  
+  const headerStyle: React.CSSProperties = {
+    backgroundColor: isDark ? '#334155' : '#f1f5f9',
+    color: isDark ? '#cbd5e1' : '#475569',
+    borderColor: isDark ? '#475569' : '#e2e8f0'
+  };
+  
+  const inputClasses = "p-1 text-xs rounded border focus:ring-indigo-500 focus:border-indigo-500 w-full";
+  const strategicClasses = "font-bold p-1 text-xs rounded border focus:ring-yellow-500 focus:border-yellow-500 w-full";
+  const headerClasses = "p-2 text-left text-xs font-bold sticky top-0 border-b";
 
   return (
     <div className="flex flex-col h-full">
-      <div className="overflow-x-auto overflow-y-auto max-h-[300px] rounded-lg border border-slate-200">
-        <table className="min-w-full divide-y divide-slate-200">
+      <div 
+        className="overflow-x-auto overflow-y-auto max-h-[300px] rounded-lg border"
+        style={{ borderColor: isDark ? '#475569' : '#e2e8f0' }}
+      >
+        <table className="min-w-full" style={{ borderColor: isDark ? '#475569' : '#e2e8f0' }}>
           <thead>
             <tr>
-              <th className={headerClasses}>ID</th>
-              <th className={headerClasses}>Description</th>
-              <th className={headerClasses}>Qty</th>
-              <th className={headerClasses}>Unit</th>
-              <th className={`${headerClasses} text-green-400`}>Price ($)</th>
-              <th className={`${headerClasses} text-green-400`}>Quality (%)</th>
-              <th className={`${headerClasses} text-green-400`}>Delivery (Days)</th>
-              <th className={`${headerClasses} text-green-400`}>Payment (Days)</th>
-              <th className={`${headerClasses} text-green-400`}>Carbon (tCO2e)</th>
-              <th className={`${headerClasses} text-green-400`}>Incoterms</th>
-              <th className={headerClasses}>Region</th>
-              <th className={headerClasses}>Action</th>
+              <th className={headerClasses} style={headerStyle}>ID</th>
+              <th className={headerClasses} style={headerStyle}>Description</th>
+              <th className={headerClasses} style={headerStyle}>Qty</th>
+              <th className={headerClasses} style={headerStyle}>Unit</th>
+              <th className={headerClasses} style={{...headerStyle, color: '#4ade80'}}>Price ($)</th>
+              <th className={headerClasses} style={{...headerStyle, color: '#4ade80'}}>Quality (%)</th>
+              <th className={headerClasses} style={{...headerStyle, color: '#4ade80'}}>Delivery (Days)</th>
+              <th className={headerClasses} style={{...headerStyle, color: '#4ade80'}}>Payment (Days)</th>
+              <th className={headerClasses} style={{...headerStyle, color: '#4ade80'}}>Carbon (tCO2e)</th>
+              <th className={headerClasses} style={{...headerStyle, color: '#4ade80'}}>Incoterms</th>
+              <th className={headerClasses} style={headerStyle}>Region</th>
+              <th className={headerClasses} style={headerStyle}>Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody style={{ borderColor: isDark ? '#334155' : '#f1f5f9' }}>
             {lineItems.map((item) => (
-              <tr key={item.id} className="hover:bg-slate-50">
+              <tr key={item.id} style={{ borderBottom: `1px solid ${isDark ? '#334155' : '#f1f5f9'}` }}>
                 <td className="p-2">
                   <input
                     type="text"
                     value={item.itemId}
                     onChange={(e) => handleInputChange(e, item.id, "itemId")}
                     className={inputClasses}
+                    style={inputStyle}
                     placeholder="P001"
                     disabled={isLoading}
                   />
@@ -1477,6 +1606,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.itemDesc}
                     onChange={(e) => handleInputChange(e, item.id, "itemDesc")}
                     className={inputClasses}
+                    style={inputStyle}
                     placeholder="Component X"
                     disabled={isLoading}
                   />
@@ -1487,6 +1617,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.quantity}
                     onChange={(e) => handleInputChange(e, item.id, "quantity")}
                     className={inputClasses}
+                    style={inputStyle}
                     disabled={isLoading}
                   />
                 </td>
@@ -1496,6 +1627,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.unit}
                     onChange={(e) => handleInputChange(e, item.id, "unit")}
                     className={inputClasses}
+                    style={inputStyle}
                     placeholder="pcs"
                     disabled={isLoading}
                   />
@@ -1508,6 +1640,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.price}
                     onChange={(e) => handleInputChange(e, item.id, "price")}
                     className={strategicClasses}
+                    style={strategicStyle}
                     min="0"
                     disabled={isLoading}
                   />
@@ -1518,6 +1651,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.quality}
                     onChange={(e) => handleInputChange(e, item.id, "quality")}
                     className={strategicClasses}
+                    style={strategicStyle}
                     min="0"
                     max="100"
                     disabled={isLoading}
@@ -1529,6 +1663,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.deliveryTime}
                     onChange={(e) => handleInputChange(e, item.id, "deliveryTime")}
                     className={strategicClasses}
+                    style={strategicStyle}
                     min="1"
                     disabled={isLoading}
                   />
@@ -1539,6 +1674,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.paymentTerms}
                     onChange={(e) => handleInputChange(e, item.id, "paymentTerms")}
                     className={strategicClasses}
+                    style={strategicStyle}
                     min="15"
                     disabled={isLoading}
                   />
@@ -1549,6 +1685,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.carbonFootprint}
                     onChange={(e) => handleInputChange(e, item.id, "carbonFootprint")}
                     className={strategicClasses}
+                    style={strategicStyle}
                     min="0"
                     disabled={isLoading}
                   />
@@ -1558,6 +1695,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.incoterms}
                     onChange={(e) => handleInputChange(e, item.id, "incoterms")}
                     className={strategicClasses}
+                    style={strategicStyle}
                     disabled={isLoading}>
                     <option value="FOB">FOB</option>
                     <option value="DDP">DDP</option>
@@ -1569,6 +1707,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     value={item.region}
                     onChange={(e) => handleInputChange(e, item.id, "region")}
                     className={inputClasses}
+                    style={inputStyle}
                     disabled={isLoading}>
                     {(Object.keys(MOCK_CARBON_TARGETS) as Region[]).map((region) => (
                       <option key={region} value={region}>
@@ -1582,7 +1721,7 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
                     <button
                       onClick={() => removeLineItem(item.id)}
                       disabled={isLoading}
-                      className="text-red-500 hover:text-red-400 disabled:opacity-50">
+                      className="text-red-500 dark:text-red-400 hover:text-red-400 dark:hover:text-red-300 disabled:opacity-50">
                       <Trash2 size={16} />
                     </button>
                   )}
@@ -1596,7 +1735,12 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
         <button
           onClick={addLineItem}
           disabled={isLoading}
-          className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-indigo-600 font-medium rounded-lg transition duration-200 disabled:opacity-50 flex items-center">
+          className="px-4 py-2 font-medium rounded-lg transition duration-200 disabled:opacity-50 flex items-center"
+          style={{
+            backgroundColor: isDark ? '#334155' : '#e2e8f0',
+            color: isDark ? '#818cf8' : '#4f46e5'
+          }}
+        >
           <PlusCircle size={16} className="mr-2" /> Add Line Item
         </button>
       </div>
@@ -1606,25 +1750,51 @@ const QuotationTableInput: React.FC<QuotationTableInputProps> = ({
 
 interface AttributeRankingDisplayProps {
   ranking: RankedAttribute[];
+  isDark?: boolean;
 }
 
-const AttributeRankingDisplay: React.FC<AttributeRankingDisplayProps> = ({ ranking }) => (
-  <div className="mt-6 p-4 bg-slate-50 rounded-lg shadow-inner border border-slate-200">
-    <h4 className="text-lg font-semibold text-yellow-700 mb-3 flex items-center">
+const AttributeRankingDisplay: React.FC<AttributeRankingDisplayProps> = ({ ranking, isDark = false }) => (
+  <div 
+    className="mt-6 p-4 rounded-lg shadow-inner border"
+    style={{
+      backgroundColor: isDark ? 'rgba(51, 65, 85, 0.5)' : '#f8fafc',
+      borderColor: isDark ? '#475569' : '#e2e8f0'
+    }}
+  >
+    <h4 className="text-lg font-semibold mb-3 flex items-center" style={{ color: isDark ? '#fbbf24' : '#a16207' }}>
       <ListOrdered size={18} className="mr-2" /> Strategic Attribute Ranking
     </h4>
     <ul className="space-y-2 text-sm">
       {ranking.map((attr, index) => (
         <li
           key={attr.key}
-          className={`flex justify-between items-center p-1 rounded-md ${
-            attr.isFocused ? "bg-red-100 border border-red-300" : "bg-white border border-slate-200"
-          }`}>
-          <span className={`w-6 text-center font-bold ${attr.isFocused ? "text-red-500" : "text-slate-500"}`}>
+          className="flex justify-between items-center p-1 rounded-md border"
+          style={attr.isFocused 
+            ? { 
+                backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : '#fef2f2',
+                borderColor: isDark ? '#b91c1c' : '#fca5a5'
+              }
+            : {
+                backgroundColor: isDark ? '#1e293b' : '#ffffff',
+                borderColor: isDark ? '#475569' : '#e2e8f0'
+              }
+          }
+        >
+          <span 
+            className="w-6 text-center font-bold"
+            style={{ color: attr.isFocused ? (isDark ? '#f87171' : '#ef4444') : (isDark ? '#94a3b8' : '#64748b') }}
+          >
             {index + 1}.
           </span>
-          <span className={`flex-1 font-medium ${attr.isFocused ? "text-slate-800" : "text-slate-600"}`}>{attr.label}</span>
-          {attr.isFocused && <span className="text-xs text-red-500 font-bold ml-2">PRIORITY</span>}
+          <span 
+            className="flex-1 font-medium"
+            style={{ color: attr.isFocused ? (isDark ? '#f1f5f9' : '#1e293b') : (isDark ? '#cbd5e1' : '#475569') }}
+          >
+            {attr.label}
+          </span>
+          {attr.isFocused && (
+            <span className="text-xs font-bold ml-2" style={{ color: isDark ? '#f87171' : '#ef4444' }}>PRIORITY</span>
+          )}
         </li>
       ))}
     </ul>
@@ -1632,6 +1802,10 @@ const AttributeRankingDisplay: React.FC<AttributeRankingDisplayProps> = ({ ranki
 );
 
 const App: React.FC = () => {
+  // Theme state
+  const theme = useThemeState();
+  const isDark = theme === 'dark';
+  
   const [buyerName, setBuyerName] = useState("Toyota");
   const [isLoading, setIsLoading] = useState(false);
   const [buyerSentiment, setBuyerSentiment] = useState("Select a buyer and click 'Analyze' to fetch real-time data.");
@@ -1766,12 +1940,23 @@ const App: React.FC = () => {
     () => (
       <div className="w-80 space-y-6">
         {/* Buyer Selector */}
-        <div className="p-4 bg-white rounded-lg shadow-lg border border-slate-200">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Select Target Buyer</label>
+        <div 
+          className="p-4 rounded-lg shadow-lg border"
+          style={{
+            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+            borderColor: isDark ? '#334155' : '#e2e8f0'
+          }}
+        >
+          <label className="block text-sm font-semibold mb-2" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>Select Target Buyer</label>
           <select
             value={buyerName}
             onChange={(e) => handleAnalyze(e.target.value)}
-            className="w-full bg-white text-slate-800 p-2 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border border-slate-300"
+            className="w-full p-2 rounded-md focus:ring-indigo-500 focus:border-indigo-500 border"
+            style={{
+              backgroundColor: isDark ? '#334155' : '#ffffff',
+              color: isDark ? '#f1f5f9' : '#1e293b',
+              borderColor: isDark ? '#475569' : '#cbd5e1'
+            }}
             disabled={isLoading}>
             {BUYER_PROFILES.map((p) => (
               <option key={p.name} value={p.name}>
@@ -1789,83 +1974,89 @@ const App: React.FC = () => {
         </div>
 
         {/* Live Data & Historical Baseline Panel */}
-        <div className="w-full max-h-[600px] overflow-y-auto p-4 bg-white rounded-lg shadow-lg border border-slate-200">
-          <h3 className="text-xl font-bold text-indigo-600 mb-4 flex items-center">
+        <div 
+          className="w-full max-h-[600px] overflow-y-auto p-4 rounded-lg shadow-lg border"
+          style={{
+            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+            borderColor: isDark ? '#334155' : '#e2e8f0'
+          }}
+        >
+          <h3 className="text-xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#818cf8' : '#4f46e5' }}>
             <MessageCircle size={20} className="mr-2" /> Live Buyer Sentiment
           </h3>
-          <p className="text-sm text-slate-600 border-l-4 border-indigo-500 pl-3">{buyerSentiment}</p>
+          <p className="text-sm border-l-4 border-indigo-500 pl-3" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>{buyerSentiment}</p>
           <div className="mt-6">
-            <h4 className="text-lg font-semibold text-slate-800 flex items-center">
-              <Target size={18} className="mr-2 text-red-500" /> Inferred Priority
+            <h4 className="text-lg font-semibold flex items-center" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>
+              <Target size={18} className="mr-2" style={{ color: isDark ? '#f87171' : '#ef4444' }} /> Inferred Priority
             </h4>
-            <p className="2xl font-extrabold text-red-500 mt-1">{buyerFocus}</p>
+            <p className="2xl font-extrabold mt-1" style={{ color: isDark ? '#f87171' : '#ef4444' }}>{buyerFocus}</p>
           </div>
 
           {/* Ranking Display */}
-          <AttributeRankingDisplay ranking={attributeRanking} />
+          <AttributeRankingDisplay ranking={attributeRanking} isDark={isDark} />
 
-          <div className="mt-8 pt-4 border-t border-slate-200">
-            <h4 className="text-lg font-semibold text-slate-800 mb-2">Historical Baseline (RoR Data)</h4>
+          <div className="mt-8 pt-4 border-t border-slate-200 dark:border-slate-600">
+            <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Historical Baseline (RoR Data)</h4>
             {historicalData ? (
-              <ul className="text-sm text-slate-600 space-y-1">
+              <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-1">
                 {Object.entries(historicalData).map(([key, value]) => (
                   <li key={key} className="flex justify-between">
                     <span className="capitalize">{ATTRIBUTES.find((a) => a.key === key)?.label || key}:</span>
-                    <span className="font-mono text-indigo-600">
+                    <span className="font-mono text-indigo-600 dark:text-indigo-400">
                       {value} {ATTRIBUTES.find((a) => a.key === key)?.unit}
                     </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-red-500">No historical data found.</p>
+              <p className="text-sm text-red-500 dark:text-red-400">No historical data found.</p>
             )}
           </div>
 
           {/* Real-time Market Data Status */}
-          <div className="mt-6 pt-4 border-t border-slate-200">
-            <h4 className="text-lg font-semibold text-slate-800 mb-3 flex items-center">
-              <Globe size={16} className="mr-2 text-green-600" /> Live Market Data
+          <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600">
+            <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-3 flex items-center">
+              <Globe size={16} className="mr-2 text-green-600 dark:text-green-400" /> Live Market Data
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">Company Performance</span>
+                <span className="text-slate-600 dark:text-slate-300">Company Performance</span>
                 {isLoadingMarketData ? (
                   <Loader2 size={14} className="animate-spin text-blue-500" />
                 ) : realPerformanceData[buyerName] ? (
-                  <span className="text-green-600 text-xs bg-green-100 px-2 py-0.5 rounded">✓ Live</span>
+                  <span className="text-green-600 dark:text-green-400 text-xs bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded">✓ Live</span>
                 ) : (
-                  <span className="text-slate-500 text-xs bg-slate-200 px-2 py-0.5 rounded">Mock</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">Mock</span>
                 )}
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">Material Rejection</span>
+                <span className="text-slate-600 dark:text-slate-300">Material Rejection</span>
                 {isLoadingMarketData ? (
                   <Loader2 size={14} className="animate-spin text-blue-500" />
                 ) : realRejectionData[buyerName] ? (
-                  <span className="text-green-600 text-xs bg-green-100 px-2 py-0.5 rounded">✓ Live</span>
+                  <span className="text-green-600 dark:text-green-400 text-xs bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded">✓ Live</span>
                 ) : (
-                  <span className="text-slate-500 text-xs bg-slate-200 px-2 py-0.5 rounded">Mock</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">Mock</span>
                 )}
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">Carbon Targets</span>
+                <span className="text-slate-600 dark:text-slate-300">Carbon Targets</span>
                 {isLoadingMarketData ? (
                   <Loader2 size={14} className="animate-spin text-blue-500" />
                 ) : realCarbonTargets ? (
-                  <span className="text-green-600 text-xs bg-green-100 px-2 py-0.5 rounded">✓ Live</span>
+                  <span className="text-green-600 dark:text-green-400 text-xs bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded">✓ Live</span>
                 ) : (
-                  <span className="text-slate-500 text-xs bg-slate-200 px-2 py-0.5 rounded">Mock</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">Mock</span>
                 )}
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-slate-600">Commodity Prices</span>
+                <span className="text-slate-600 dark:text-slate-300">Commodity Prices</span>
                 {isLoadingMarketData ? (
                   <Loader2 size={14} className="animate-spin text-blue-500" />
                 ) : Object.keys(commodityPrices).length > 0 ? (
-                  <span className="text-green-600 text-xs bg-green-100 px-2 py-0.5 rounded">✓ Live</span>
+                  <span className="text-green-600 dark:text-green-400 text-xs bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded">✓ Live</span>
                 ) : (
-                  <span className="text-slate-500 text-xs bg-slate-200 px-2 py-0.5 rounded">Mock</span>
+                  <span className="text-slate-500 dark:text-slate-400 text-xs bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded">Mock</span>
                 )}
               </div>
             </div>
@@ -1873,34 +2064,50 @@ const App: React.FC = () => {
         </div>
       </div>
     ),
-    [buyerName, isLoading, handleAnalyze, buyerSentiment, buyerFocus, historicalData, attributeRanking, isLoadingMarketData, realPerformanceData, realRejectionData, realCarbonTargets, commodityPrices]
+    [buyerName, isLoading, handleAnalyze, buyerSentiment, buyerFocus, historicalData, attributeRanking, isLoadingMarketData, realPerformanceData, realRejectionData, realCarbonTargets, commodityPrices, isDark]
   );
 
   const OptimizationPanel = useMemo(
     () => (
       <div className="flex-1 space-y-6">
         {/* Input Table Panel */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200 flex flex-col max-h-[480px]">
-          <h3 className="text-2xl font-bold text-slate-800 mb-4 flex items-center">
-            <TrendingUp size={24} className="mr-2 text-green-600" /> Supplier Quotation Inputs
+        <div 
+          className="p-6 rounded-xl shadow-lg border flex flex-col max-h-[480px]"
+          style={{
+            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+            borderColor: isDark ? '#334155' : '#e2e8f0'
+          }}
+        >
+          <h3 className="text-2xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>
+            <TrendingUp size={24} className="mr-2" style={{ color: isDark ? '#4ade80' : '#16a34a' }} /> Supplier Quotation Inputs
           </h3>
           <QuotationTableInput
             lineItems={lineItems}
             setLineItems={setLineItems}
             onLineItemChange={handleLineItemChange}
             isLoading={isLoading}
+            isDark={isDark}
           />
         </div>
 
         {/* Output Panel */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
-          <h3 className="2xl font-bold text-slate-800 mb-4 flex items-center">
-            <Layers size={24} className="mr-2 text-yellow-600" /> Optimized Quotation Strategy
+        <div 
+          className="p-6 rounded-xl shadow-lg border"
+          style={{
+            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+            borderColor: isDark ? '#334155' : '#e2e8f0'
+          }}
+        >
+          <h3 className="2xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>
+            <Layers size={24} className="mr-2" style={{ color: isDark ? '#fbbf24' : '#ca8a04' }} /> Optimized Quotation Strategy
           </h3>
           {optimizationResult ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-slate-100 rounded-lg">
-                <span className="text-lg font-semibold text-slate-700">Attractiveness Score:</span>
+              <div 
+                className="flex items-center justify-between p-4 rounded-lg"
+                style={{ backgroundColor: isDark ? '#334155' : '#f1f5f9' }}
+              >
+                <span className="text-lg font-semibold" style={{ color: isDark ? '#e2e8f0' : '#334155' }}>Attractiveness Score:</span>
                 <span
                   className={`text-4xl font-extrabold ${
                     parseFloat(optimizationResult.score) >= 85
@@ -1914,45 +2121,57 @@ const App: React.FC = () => {
               </div>
 
               {/* Recommendations Section - PER ITEM */}
-              <RecommendedTargets lineItems={lineItems} buyerFocus={buyerFocus} />
+              <RecommendedTargets lineItems={lineItems} buyerFocus={buyerFocus} isDark={isDark} />
 
-              <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
-                <h4 className="text-lg font-semibold text-yellow-700">Suggested Proposal Emphasis:</h4>
-                <p className="text-slate-800 font-bold">{optimizationResult.emphasis}</p>
-                <p className="text-sm text-slate-600 mt-2">
+              <div 
+                className="p-4 rounded-lg border-l-4 border-yellow-500"
+                style={{ backgroundColor: isDark ? 'rgba(234, 179, 8, 0.15)' : '#fefce8' }}
+              >
+                <h4 className="text-lg font-semibold" style={{ color: isDark ? '#fbbf24' : '#a16207' }}>Suggested Proposal Emphasis:</h4>
+                <p className="font-bold" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>{optimizationResult.emphasis}</p>
+                <p className="text-sm mt-2" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>
                   <span dangerouslySetInnerHTML={{ __html: optimizationResult.suggestion }} />
                 </p>
               </div>
 
-              <div className="p-4 bg-indigo-50 rounded-lg border-l-4 border-indigo-500">
-                <h4 className="text-lg font-semibold text-indigo-700">Incoterms Implication:</h4>
-                <p className="text-slate-800 font-bold">{lineItems.length > 0 ? lineItems[0].incoterms : "N/A"}</p>
-                <p className="text-sm text-slate-600 mt-2">{optimizationResult.incotermDetail}</p>
+              <div 
+                className="p-4 rounded-lg border-l-4 border-indigo-500"
+                style={{ backgroundColor: isDark ? 'rgba(99, 102, 241, 0.15)' : '#eef2ff' }}
+              >
+                <h4 className="text-lg font-semibold" style={{ color: isDark ? '#818cf8' : '#4338ca' }}>Incoterms Implication:</h4>
+                <p className="font-bold" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>{lineItems.length > 0 ? lineItems[0].incoterms : "N/A"}</p>
+                <p className="text-sm mt-2" style={{ color: isDark ? '#cbd5e1' : '#475569' }}>{optimizationResult.incotermDetail}</p>
               </div>
             </div>
           ) : (
-            <p className="text-slate-500">
+            <p style={{ color: isDark ? '#94a3b8' : '#64748b' }}>
               Adjust the inputs and click 'Optimize & Generate Quote' to view the strategy.
             </p>
           )}
         </div>
       </div>
     ),
-    [lineItems, isLoading, optimizationResult, handleLineItemChange, buyerFocus]
+    [lineItems, isLoading, optimizationResult, handleLineItemChange, buyerFocus, isDark]
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 p-8">
-      <header className="mb-8 border-b pb-4 border-slate-200 flex justify-between items-center">
+    <div 
+      className="min-h-screen p-8 transition-colors duration-300"
+      style={{
+        backgroundColor: isDark ? '#0f172a' : '#f8fafc',
+        color: isDark ? '#f1f5f9' : '#1e293b'
+      }}
+    >
+      <header 
+        className="mb-8 border-b pb-4 flex justify-between items-center"
+        style={{ borderColor: isDark ? '#334155' : '#e2e8f0' }}
+      >
         <div className="flex items-center">
           {/* Logo/Branding Element */}
-          <Layers size={30} className="mr-3 text-indigo-600" />
-          <h1 className="text-3xl font-extrabold text-indigo-600">
-            AI-driven <span className="text-slate-800">Quote Optimizer</span>
+          <Layers size={30} className="mr-3" style={{ color: isDark ? '#818cf8' : '#4f46e5' }} />
+          <h1 className="text-3xl font-extrabold" style={{ color: isDark ? '#818cf8' : '#4f46e5' }}>
+            AI-driven <span style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>Quote Optimizer</span>
           </h1>
-        </div>
-        <div className="text-sm text-slate-600 p-2 border border-indigo-300 rounded-full bg-indigo-50 font-semibold">
-          Strategic Supplier Platform
         </div>
       </header>
 
@@ -1986,26 +2205,50 @@ const App: React.FC = () => {
 
       {/* Commodity Prices Panel */}
       {Object.keys(commodityPrices).length > 0 && (
-        <div className="mt-6 p-6 bg-white rounded-xl shadow-lg border border-slate-200">
-          <h3 className="text-xl font-bold text-emerald-600 mb-4 flex items-center">
+        <div 
+          className="mt-6 p-6 rounded-xl shadow-lg border"
+          style={{
+            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+            borderColor: isDark ? '#334155' : '#e2e8f0'
+          }}
+        >
+          <h3 className="text-xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#34d399' : '#059669' }}>
             <TrendingUp size={20} className="mr-2" /> Live Commodity Prices
-            <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full flex items-center">
+            <span 
+              className="ml-2 text-xs px-2 py-1 rounded-full flex items-center"
+              style={{
+                color: isDark ? '#4ade80' : '#16a34a',
+                backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7'
+              }}
+            >
               <Globe size={10} className="mr-1" /> Real-time
             </span>
           </h3>
           <div className="grid grid-cols-5 gap-4">
             {Object.entries(commodityPrices).map(([material, data]) => (
-              <div key={material} className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h4 className="text-sm font-semibold text-slate-700">{material}</h4>
-                <p className="text-2xl font-bold text-slate-800 mt-1">
+              <div 
+                key={material} 
+                className="p-4 rounded-lg border"
+                style={{
+                  backgroundColor: isDark ? '#334155' : '#f8fafc',
+                  borderColor: isDark ? '#475569' : '#e2e8f0'
+                }}
+              >
+                <h4 className="text-sm font-semibold" style={{ color: isDark ? '#cbd5e1' : '#334155' }}>{material}</h4>
+                <p className="text-2xl font-bold mt-1" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>
                   ${typeof data.price === 'number' ? data.price.toLocaleString() : data.price}
                 </p>
-                <p className="text-xs text-slate-500">{data.unit}</p>
-                <span className={`text-xs font-semibold mt-2 inline-block px-2 py-0.5 rounded ${
-                  data.trend === 'up' ? 'text-green-600 bg-green-100' :
-                  data.trend === 'down' ? 'text-red-600 bg-red-100' :
-                  'text-yellow-600 bg-yellow-100'
-                }`}>
+                <p className="text-xs" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>{data.unit}</p>
+                <span 
+                  className="text-xs font-semibold mt-2 inline-block px-2 py-0.5 rounded"
+                  style={
+                    data.trend === 'up' 
+                      ? { color: isDark ? '#4ade80' : '#16a34a', backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7' }
+                      : data.trend === 'down' 
+                        ? { color: isDark ? '#f87171' : '#dc2626', backgroundColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#fef2f2' }
+                        : { color: isDark ? '#fbbf24' : '#ca8a04', backgroundColor: isDark ? 'rgba(251, 191, 36, 0.2)' : '#fefce8' }
+                  }
+                >
                   {data.trend === 'up' ? '↑ Rising' : data.trend === 'down' ? '↓ Falling' : '→ Stable'}
                 </span>
               </div>
@@ -2016,22 +2259,44 @@ const App: React.FC = () => {
 
       {/* Real Carbon Targets Panel */}
       {realCarbonTargets && (
-        <div className="mt-6 p-6 bg-white rounded-xl shadow-lg border border-slate-200">
-          <h3 className="text-xl font-bold text-blue-600 mb-4 flex items-center">
+        <div 
+          className="mt-6 p-6 rounded-xl shadow-lg border"
+          style={{
+            backgroundColor: isDark ? '#1e293b' : '#ffffff',
+            borderColor: isDark ? '#334155' : '#e2e8f0'
+          }}
+        >
+          <h3 className="text-xl font-bold mb-4 flex items-center" style={{ color: isDark ? '#60a5fa' : '#2563eb' }}>
             <Globe size={20} className="mr-2" /> Regional Carbon Reduction Targets
-            <span className="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full flex items-center">
+            <span 
+              className="ml-2 text-xs px-2 py-1 rounded-full flex items-center"
+              style={{
+                color: isDark ? '#4ade80' : '#16a34a',
+                backgroundColor: isDark ? 'rgba(34, 197, 94, 0.2)' : '#dcfce7'
+              }}
+            >
               <Globe size={10} className="mr-1" /> Live Data
             </span>
           </h3>
           <div className="grid grid-cols-4 gap-4">
             {(Object.entries(realCarbonTargets) as [Region, number][]).map(([region, factor]) => (
-              <div key={region} className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-center">
-                <h4 className="text-lg font-bold text-slate-800">{region}</h4>
-                <p className="text-3xl font-extrabold text-red-500 mt-2">
+              <div 
+                key={region} 
+                className="p-4 rounded-lg border text-center"
+                style={{
+                  backgroundColor: isDark ? '#334155' : '#f8fafc',
+                  borderColor: isDark ? '#475569' : '#e2e8f0'
+                }}
+              >
+                <h4 className="text-lg font-bold" style={{ color: isDark ? '#f1f5f9' : '#1e293b' }}>{region}</h4>
+                <p className="text-3xl font-extrabold mt-2" style={{ color: isDark ? '#f87171' : '#ef4444' }}>
                   {((1 - factor) * 100).toFixed(0)}%
                 </p>
-                <p className="text-xs text-slate-500 mt-1">Reduction Required</p>
-                <div className="mt-2 h-2 bg-slate-300 rounded-full overflow-hidden">
+                <p className="text-xs mt-1" style={{ color: isDark ? '#94a3b8' : '#64748b' }}>Reduction Required</p>
+                <div 
+                  className="mt-2 h-2 rounded-full overflow-hidden"
+                  style={{ backgroundColor: isDark ? '#475569' : '#cbd5e1' }}
+                >
                   <div 
                     className="h-full bg-gradient-to-r from-green-500 to-red-500" 
                     style={{ width: `${(1 - factor) * 100}%` }}
